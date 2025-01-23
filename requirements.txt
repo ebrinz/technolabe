@@ -1,0 +1,7 @@
+
+
+flatlib
+matplotlib
+
+flask
+flask-cors
