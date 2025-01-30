@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "api": "python api/server.py"
+    "api": "python api/natal.py",
+    "api-old": "python api/server.py"
   },
   "dependencies": {
     "date-fns": "^4.1.0",

@@ -1,18 +1,18 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from natal import NatalChart
+from natal import AstroChart
 import traceback
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": ["http://localhost:3001", "http://localhost:3000"]}})
 
-@app.route('/natal-chart', methods=['POST'])
+@app.route('/chart', methods=['POST'])
 def get_natal_chart():
     try:
         data = request.json
         print("Received data:", data)
         
-        chart = NatalChart(
+        chart = AstroChart(
             data['date'].replace('-', '/'),
             data['time'],
             float(data['lat']), 
