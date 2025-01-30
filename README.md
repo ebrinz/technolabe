@@ -34,3 +34,51 @@ npm run dev
 - Real-time natal chart updates
 - Visual display of planetary positions and aspects
 - House placement calculations
+
+
+## sitemap
+
+```
+├── README.md
+├── astrologer-llm
+│   ├── data
+│   │   ├── embeddings
+│   │   ├── processed
+│   │   └── raw
+│   ├── deployment
+│   ├── evaluation
+│   └── training
+│       ├── lora_config
+│       └── quantization
+├── natal-chart-app
+│   ├── README.md
+│   ├── api
+│   │   ├── README.md
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   └── natal.cpython-311.pyc
+│   │   ├── natal.py
+│   │   └── server.py
+│   ├── eslint.config.mjs
+│   ├── jsconfig.json
+│   ├── next.config.mjs
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.mjs
+│   ├── public
+│   │   ├── file.svg
+│   │   ├── globe.svg
+│   │   ├── next.svg
+│   │   ├── vercel.svg
+│   │   └── window.svg
+│   ├── src
+│   │   └── app
+│   │       ├── components
+│   │       │   └── NatalChartApp.js
+│   │       ├── favicon.ico
+│   │       ├── globals.css
+│   │       ├── layout.js
+│   │       └── page.js
+│   └── tailwind.config.mjs
+└── requirements.txt
+```
