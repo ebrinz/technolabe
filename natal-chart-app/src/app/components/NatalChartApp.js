@@ -152,8 +152,8 @@ const NatalChartGenerator = () => {
           x2={planet2.position.x}
           y2={planet2.position.y}
           stroke={ASPECT_COLORS[aspect.aspect_type]}
-          strokeWidth="1"
-          opacity="0.3"
+          strokeWidth="25"
+          opacity="0.8"
         />
       );
     });
@@ -223,9 +223,9 @@ const NatalChartGenerator = () => {
               x2={planet2.position.x}
               y2={planet2.position.y}
               stroke={ASPECT_COLORS[aspect.aspect_type]}
-              strokeWidth="1"
-              opacity="0.3"
-              style={{ filter: 'blur(0.5px)' }}
+              strokeWidth="3"
+              opacity="0.7"
+              style={{ filter: 'blur(0.6px)' }}
             />
           );
         })}
