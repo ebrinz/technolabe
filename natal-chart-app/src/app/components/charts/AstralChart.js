@@ -19,6 +19,8 @@ const ZODIAC_SIGNS = [
 
 const ROMAN_NUMERALS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
 
+const CUNEIFORM_NUMBERS = ['𒁹', '𒁹𒁹', '𒁹𒁹𒁹', '𒁹𒁹𒁹𒁹', '𒈠', '𒈠𒁹', '𒈠𒁹𒁹', '𒈠𒁹𒁹𒁹', '𒈠𒁹𒁹𒁹𒁹', '𒈦', '𒈦𒁹', '𒈦𒁹𒁹']
+
 const PLANET_SYMBOLS = {
   'Sun': '☉',
   'Moon': '☽',
@@ -51,15 +53,23 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
   
   if (!chartData?.points) return null;
 
-  const radius = 150;
-  const center = { x: 200, y: 200 };
-  const innerRadius = radius - 30; // Inner circle
-  const outerBoundaryRadius = radius + 55; // New outer boundary
-  const zodiacRadius = radius + 25; // Moved closer to main circle
-  const houseRadius = radius + 40; // Pulled in house lines
-  const houseInnerRadius = innerRadius + 5; // Pulled in house lines
-  const houseLabelRadius = (outerBoundaryRadius + houseRadius) / 2; // House labels
-  const planetLabelRadius = radius + 35; // Adjusted for planet labels
+  const radius = 140; // Slightly reduced from 150
+  const center = { x: 200, y: 200 }; // Adjusted from 200,200
+  const innerRadius = radius - 30;
+  const outerBoundaryRadius = radius + 45; // Reduced from 55
+  const zodiacRadius = radius + 20; // Adjusted
+  const outerZodiacRadius = zodiacRadius + 10;
+  const houseRadius = radius + 35; // Adjusted
+  const houseInnerRadius = innerRadius + 5;
+  const zodiacLabelRadius = (radius + zodiacRadius) / 2;
+  const houseLabelRadius = (outerBoundaryRadius + houseRadius) / 2;
+  const planetLabelRadius = radius + 30; // Adjusted
+
+
+  const getTextRotation = (degrees) => {
+    let rotation = degrees;
+    return rotation;
+  };
 
   const degreesToXY = (degrees, r) => ({
     x: center.x + r * Math.cos((degrees - 90) * Math.PI / 180),
@@ -74,11 +84,12 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
       const midpointDegree = calculateMidpoint(degree, nextDegree);
       
       return {
-        house: ROMAN_NUMERALS[houseNum],
+        house: CUNEIFORM_NUMBERS[houseNum],
         startDegree: degree,
         midpointDegree,
         position: degreesToXY(degree, radius),
-        labelPosition: degreesToXY(midpointDegree, houseLabelRadius)
+        labelPosition: degreesToXY(midpointDegree, houseLabelRadius),
+        rotation: getTextRotation(midpointDegree)
       };
     });
 
@@ -116,27 +127,27 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
       <circle cx={center.x} cy={center.y} r={outerBoundaryRadius} 
               className="fill-none stroke-orange-500/30" strokeWidth="1.5"/>
       <circle cx={center.x} cy={center.y} r={houseRadius} 
-              className="fill-none stroke-cyan-400/20" strokeWidth="1"/>
+              className="fill-none stroke-orange-400/20" strokeWidth="1"/>
+      <circle cx={center.x} cy={center.y} r={outerZodiacRadius} 
+              className="fill-none stroke-cyan-400/30" strokeWidth="1"/>
       <circle cx={center.x} cy={center.y} r={radius} 
               className="fill-none stroke-cyan-400/30" strokeWidth="1"/>
+      <circle cx={center.x} cy={center.y} r={houseInnerRadius} 
+              className="fill-none stroke-orange-300/20" strokeWidth="0.5"/>
       <circle cx={center.x} cy={center.y} r={innerRadius} 
               className="fill-none stroke-cyan-300/20" strokeWidth="0.5"/>
-      <circle cx={center.x} cy={center.y} r={houseInnerRadius} 
-              className="fill-none stroke-cyan-300/20" strokeWidth="0.5"/>
 
-      {/* House cusp lines */}
-      {houseCusps.map((house, i) => (
+       {/* House cusp lines */}
+       {houseCusps.map((house, i) => (
         <g key={`house-${i}`}>
           <line 
             x1={degreesToXY(house.startDegree, houseInnerRadius).x}
             y1={degreesToXY(house.startDegree, houseInnerRadius).y}
-            x2={degreesToXY(house.startDegree, houseRadius).x}
-            y2={degreesToXY(house.startDegree, houseRadius).y}
-            className="stroke-orange-400/40"
+            x2={degreesToXY(house.startDegree, outerBoundaryRadius).x}
+            y2={degreesToXY(house.startDegree, outerBoundaryRadius).y}
+            className="stroke-orange-400/20"
             strokeWidth="1"
-            style={{
-              filter: 'url(#orangeGlow)'
-            }}
+            style={{ filter: 'url(#orangeGlow)' }}
           />
           <text 
             x={house.labelPosition.x}
@@ -146,6 +157,8 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
             className="fill-orange-300 text-xs font-serif"
             style={{ 
               filter: 'url(#orangeGlow)',
+              transform: `rotate(${house.rotation}deg)`,
+              transformOrigin: `${house.labelPosition.x}px ${house.labelPosition.y}px`
             }}
           >
             {house.house}
@@ -155,8 +168,8 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
 
       {/* Zodiac cusps and degree markers */}
       {ZODIAC_SIGNS.map((sign, i) => {
-        const cuspDegree = sign.degree;
-        const midpointDegree = cuspDegree + 15; // Midpoint of the sign
+        const cuspDegree = sign.degree - 15;
+        // const midpointDegree = cuspDegree + 15; // Midpoint of the sign
         
         const degreeMarkers = [];
         for (let deg = 0; deg < 30; deg++) {
@@ -169,9 +182,10 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
           else if (deg % 5 === 0) {
             markerLength = 8;
           }
-          
+
           const markerStart = degreesToXY(markerDegree, radius - markerLength);
           const markerEnd = degreesToXY(markerDegree, radius);
+          
           
           degreeMarkers.push(
             <line
@@ -193,9 +207,38 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
         );
       })}
 
-      {/* Zodiac signs with tooltips */}
+      {/* Zodiac cusp borderlines */}
       {ZODIAC_SIGNS.map((sign, i) => {
-        const position = degreesToXY(sign.degree, zodiacRadius);
+        const cuspLineDegree = sign.degree;
+        const cuspLineMarkers = [];
+        
+        const cuspLineStart = degreesToXY(cuspLineDegree, outerZodiacRadius);
+        const cuspLineEnd = degreesToXY(cuspLineDegree, radius);
+          
+        cuspLineMarkers.push(
+            <line
+                key={`marker-${i}-${cuspLineDegree}`}
+                x1={cuspLineStart.x}
+                y1={cuspLineStart.y}
+                x2={cuspLineEnd.x}
+                y2={cuspLineEnd.y}
+                className={`stroke-cyan-300 stroke-1`}
+                opacity={0.3}
+            />
+        );
+
+        return (
+          <g key={`cusp-${i}`}>
+            {cuspLineMarkers}
+          </g>
+        );
+      })}
+
+      {/* Zodiac signs with rotated labels */}
+      {ZODIAC_SIGNS.map((sign, i) => {
+        const position = degreesToXY(sign.degree + 15, zodiacLabelRadius);
+        const rotation = getTextRotation(sign.degree + 15);
+        
         return (
           <g key={`zodiac-${i}`}
              onMouseEnter={() => setHoveredSign(sign.name)}
@@ -206,10 +249,12 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
               y={position.y}
               textAnchor="middle"
               dominantBaseline="middle"
-              className="fill-cyan-300 text-lg font-astrological"
+              className="fill-cyan-300 text-xl font-astrological"
               style={{ 
                 textShadow: '0 0 10px #06b6d4',
-                fontFamily: 'Arial Unicode MS, sans-serif' 
+                fontFamily: 'Arial Unicode MS, sans-serif',
+                transform: `rotate(${rotation}deg)`,
+                transformOrigin: `${position.x}px ${position.y}px`
               }}
             >
               {sign.symbol}

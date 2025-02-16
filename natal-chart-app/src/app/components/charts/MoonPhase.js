@@ -55,7 +55,7 @@ const MoonPhase = ({ chartData }) => {
     // Draw moon circle
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    ctx.fillStyle = '#cbd5e1'; // Base moon color
+    ctx.fillStyle = 'cyan'; // Base moon color
     ctx.fill();
 
     // Draw phase shadow
@@ -64,7 +64,7 @@ const MoonPhase = ({ chartData }) => {
     
     // Calculate shadow curve based on phase
     const phaseAngle = phase.angle;
-    const curveX = centerX + radius * Math.cos((phaseAngle - 90) * Math.PI / 180);
+    const curveX = centerX + radius * Math.cos((phaseAngle) * Math.PI / 180);
     
     if (phaseAngle < 180) {
       // Waxing phase
@@ -96,8 +96,9 @@ const MoonPhase = ({ chartData }) => {
   const moonPhase = calculateMoonPhase();
 
   return (
-    <div className="bg-black/50 backdrop-blur-sm rounded-lg shadow-lg shadow-cyan-500/20 p-4 border border-cyan-500/20">
-      <h3 className="text-cyan-300 text-lg font-medium mb-4">Moon Phase</h3>
+    // <div className="bg-black/50 backdrop-blur-sm rounded-lg shadow-lg shadow-cyan-500/20 p-4 border border-cyan-500/20">
+    <div>
+      <h3 className="text-cyan-300 text-lg font-medium mb-4"></h3>
       <div className="flex items-center justify-center mb-4">
         <canvas 
           ref={canvasRef}
@@ -107,14 +108,16 @@ const MoonPhase = ({ chartData }) => {
         />
       </div>
       {moonPhase && (
+        // <div className="text-center">
         <div className="text-center">
-          <div className="text-cyan-300 font-medium mb-1">{moonPhase.name}</div>
-          <div className="text-cyan-400/70 text-sm">
-            {(moonPhase.illumination * 100).toFixed(1)}% illuminated
-          </div>
-          <div className="text-cyan-400/70 text-sm">
-            {moonPhase.angle.toFixed(1)}° phase angle
-          </div>
+          {/* <div className="text-cyan-300 font-medium mb-1">{moonPhase.name}</div> */}
+          {/* <div className="text-cyan-400/70 text-sm"> */}
+            {/* {(moonPhase.illumination * 100).toFixed(1)}% illuminated */}
+          {/* </div> */}
+          
+          {/* <div className="text-cyan-400/70 text-sm"> */}
+            {/* {moonPhase.angle.toFixed(1)}° phase angle */}
+          {/* </div> */}
         </div>
       )}
     </div>

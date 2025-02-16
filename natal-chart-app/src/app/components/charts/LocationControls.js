@@ -4,12 +4,12 @@ import GlobeComponent from '../GlobeComponent';
 
 export const LocationControls = ({ selectedLocation, onLocationChange }) => (
   <div className="bg-black/50 backdrop-blur-sm rounded-lg shadow-lg shadow-cyan-500/20 p-4 border border-cyan-500/20">
-    <div className="h-64 rounded-lg mb-4 bg-black/30">
+    {/* <div className="h-64 rounded-lg mb-4 bg-black/30">
       <GlobeComponent 
         selectedLocation={selectedLocation}
         onLocationChange={onLocationChange}
       />
-    </div>
+    </div> */}
     
     <div className="space-y-4 bg-black/30 p-4 rounded-lg">
       {/* Latitude Slider */}

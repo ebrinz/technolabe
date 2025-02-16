@@ -6,6 +6,8 @@ import PlanetInfo from './charts/PlanetInfo';
 import { LocationControls } from './charts/LocationControls';
 import ChartDataDisplay from './charts/ChartDataDisplay';
 import MoonPhase from './charts/MoonPhase';
+import TimeDial from './charts/TimeDial';
+import GlobeComponent from './GlobeComponent';
 
 const LATITUDE_BOUNDS = {
   min: -66.5,  // Antarctic Circle
@@ -116,27 +118,48 @@ const NatalChartApp = () => {
         </div>
         
         {/* Right column - 3 columns wide */}
-        <div className="col-span-3 bg-black/50 backdrop-blur-sm rounded-lg shadow-lg shadow-cyan-500/20 p-4 border border-cyan-500/20">
-          <div className="flex gap-4 mb-4">
+        {/* <div className="col-span-3 bg-black/30 backdrop-blur-sm rounded-lg shadow-lg shadow-cyan-500/20 p-4 border border-cyan-500/20"> */}
+        <div className="col-span-3 bg-black/30 rounded-lg shadow-lg shadow-cyan-500/20 p-4 border border-cyan-500/20">
+          <div className="flex gap-4 mb-4 ">
+            <div className="flex-row bg-black/30">
+              {/* globe */}
+              <div className="h-64 bg-black/30">
+                <GlobeComponent 
+                  selectedLocation={selectedLocation}
+                  onLocationChange={handleLocationChange}
+                />
+
+              </div>
+
+              {/* Moon Phase */}
+              <div className="w-32">
+                <MoonPhase chartData={chart} />
+              </div>
+
+              <div className="w-32">
+                <TimeDial time={selectedTime} />
+              </div>
+
+            </div>
+
+            
             {/* Main chart area */}
-            <div className="flex-1 bg-black/30 rounded-lg p-4 border border-cyan-500/10">
+            {/* <div className="flex-1 bg-black/30 rounded-lg p-4 border border-cyan-500/10"> */}
+            <div className="flex-1 bg-black/30">
               <AstralChart
                 chartData={chart}
                 selectedPlanet={selectedPlanet}
                 onPlanetSelect={setSelectedPlanet}
               />
             </div>
+         
 
-            {/* Moon Phase */}
-            <div className="w-32">
-              <MoonPhase chartData={chart} />
-            </div>
           </div>
 
-          <PlanetInfo
+          {/* <PlanetInfo
             selectedPlanet={selectedPlanet}
             planetData={chart?.points[selectedPlanet]}
-          />
+          /> */}
         </div>
       </div>
     </div>
