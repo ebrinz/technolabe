@@ -1,6 +1,6 @@
 'use client'
 import React from 'react';
-import GlobeComponent from '../GlobeComponent';
+import GlobeComponent from './GlobeComponent';
 
 export const LocationControls = ({ selectedLocation, onLocationChange }) => (
   <div className="bg-black/50 backdrop-blur-sm rounded-lg shadow-lg shadow-cyan-500/20 p-4 border border-cyan-500/20">

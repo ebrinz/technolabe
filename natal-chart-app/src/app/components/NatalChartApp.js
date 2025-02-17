@@ -7,7 +7,7 @@ import { LocationControls } from './charts/LocationControls';
 import ChartDataDisplay from './charts/ChartDataDisplay';
 import MoonPhase from './charts/MoonPhase';
 import TimeDial from './charts/TimeDial';
-import GlobeComponent from './GlobeComponent';
+import GlobeComponent from './charts/GlobeComponent';
 
 const LATITUDE_BOUNDS = {
   min: -66.5,  // Antarctic Circle

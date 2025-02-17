@@ -56,13 +56,13 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
   const radius = 140; // Slightly reduced from 150
   const center = { x: 200, y: 200 }; // Adjusted from 200,200
   const innerRadius = radius - 30;
-  const outerBoundaryRadius = radius + 45; // Reduced from 55
+  const outerBoundaryRadius = radius + 50; // Reduced from 55
   const zodiacRadius = radius + 20; // Adjusted
   const outerZodiacRadius = zodiacRadius + 10;
-  const houseRadius = radius + 35; // Adjusted
-  const houseInnerRadius = innerRadius + 5;
-  const zodiacLabelRadius = (radius + zodiacRadius) / 2;
-  const houseLabelRadius = (outerBoundaryRadius + houseRadius) / 2;
+  const houseRadius = outerZodiacRadius + 4; // Adjusted
+  const houseInnerRadius = innerRadius + 4;
+  const zodiacLabelRadius = (radius + zodiacRadius) / 2 + 2;
+  const houseLabelRadius = (outerBoundaryRadius + houseRadius) / 2 - 2;
   const planetLabelRadius = radius + 30; // Adjusted
 
 
@@ -77,21 +77,23 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
   });
 
   const houseCusps = Object.entries(chartData.houses)
-    .map(([house, degree], index) => {
-      const houseNum = parseInt(house.replace('House', '')) - 1;
-      const nextHouseNum = (houseNum + 1) % 12;
-      const nextDegree = chartData.houses[`House${nextHouseNum + 1}`] || 360;
-      const midpointDegree = calculateMidpoint(degree, nextDegree);
-      
-      return {
-        house: CUNEIFORM_NUMBERS[houseNum],
-        startDegree: degree,
-        midpointDegree,
-        position: degreesToXY(degree, radius),
-        labelPosition: degreesToXY(midpointDegree, houseLabelRadius),
-        rotation: getTextRotation(midpointDegree)
-      };
-    });
+  .map(([house, degree]) => { 
+    const houseNum = parseInt(house.replace('House', ''));
+    const nextHouseNum = (houseNum % 12) + 1;
+    const nextDegree = chartData.houses[`House${nextHouseNum}`] || chartData.houses.House1;
+    const midpointDegree = nextDegree < degree 
+      ? calculateMidpoint(degree, nextDegree + 360)
+      : calculateMidpoint(degree, nextDegree);
+    
+    return {
+      house: CUNEIFORM_NUMBERS[houseNum - 1], // Adjust index to be 0-based
+      startDegree: degree,
+      midpointDegree: normalizeAngle(midpointDegree),
+      position: degreesToXY(degree, radius),
+      labelPosition: degreesToXY(normalizeAngle(midpointDegree), houseLabelRadius),
+      rotation: getTextRotation(normalizeAngle(midpointDegree))
+    };
+  });
 
   const planets = Object.entries(chartData.points).map(([planet, data]) => ({
     symbol: PLANET_SYMBOLS[planet] || planet,
