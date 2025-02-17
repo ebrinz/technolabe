@@ -13,8 +13,6 @@ const TimeDial = ({ time = "12:00" }) => {
     const hourAngle = ((hours % 12) + minutes / 60) * 30; // 30 degrees per hour
     const minuteAngle = minutes * 6; // 6 degrees per minute
     const isPM = hours >= 12;
-    
-    console.log('Angles:', { hourAngle, minuteAngle }); // Debug log
     return { hourAngle, minuteAngle, isPM };
   };
 
