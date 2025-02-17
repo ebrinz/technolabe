@@ -1,11 +1,30 @@
-import React, { useEffect, useRef } from 'react';
-
-const GeoJSON_URL = 'https://unpkg.com/world-atlas@2/land-110m.json';
+import React, { useEffect, useRef, useState } from 'react';
 
 const GlobeComponent = ({ selectedLocation }) => {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
-  const geoDataRef = useRef(null);
+  const [geoData, setGeoData] = useState({ boundaries: null, coastlines: null });
+
+  // Load GeoJSON data
+  useEffect(() => {
+    const loadGeoData = async () => {
+      try {
+        const [boundariesRes, coastlinesRes] = await Promise.all([
+          fetch('/ne_110m_admin_0_boundary_lines_land.geojson'),
+          fetch('/ne_110m_coastline.geojson')
+        ]);
+        
+        const boundaries = await boundariesRes.json();
+        const coastlines = await coastlinesRes.json();
+        
+        setGeoData({ boundaries, coastlines });
+      } catch (error) {
+        console.error('Error loading GeoJSON:', error);
+      }
+    };
+
+    loadGeoData();
+  }, []);
 
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
@@ -13,19 +32,6 @@ const GlobeComponent = ({ selectedLocation }) => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     const ctx = canvas.getContext('2d');
-
-    // Fetch GeoJSON data if not already loaded
-    if (!geoDataRef.current) {
-      fetch(GeoJSON_URL)
-        .then(response => response.json())
-        .then(data => {
-          geoDataRef.current = data;
-          drawGlobe(); // Redraw once data is loaded
-        })
-        .catch(error => {
-          console.error('Error loading world map data:', error);
-        });
-    }
     
     function updateCanvasSize() {
       const containerRect = container.getBoundingClientRect();
@@ -140,25 +146,44 @@ const GlobeComponent = ({ selectedLocation }) => {
     }
 
     function drawMapVectors(radius, centerX, centerY) {
-      if (!geoDataRef.current || !geoDataRef.current.features) return;
+      // Draw coastlines
+      if (geoData.coastlines?.features) {
+        ctx.strokeStyle = 'rgba(255, 152, 0, 0.6)';
+        ctx.lineWidth = 0.5;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
 
-      ctx.strokeStyle = 'rgba(255, 152, 0, 0.6)';
-      ctx.lineWidth = 0.5;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
+        geoData.coastlines.features.forEach(feature => {
+          if (feature.geometry.type === 'LineString') {
+            drawVectorLine(feature.geometry.coordinates, radius, centerX, centerY);
+          } else if (feature.geometry.type === 'MultiLineString') {
+            feature.geometry.coordinates.forEach(line => {
+              drawVectorLine(line, radius, centerX, centerY);
+            });
+          }
+        });
+      }
 
-      geoDataRef.current.features.forEach(feature => {
-        if (feature.geometry.type === 'Polygon') {
-          drawVectorPolygon(feature.geometry.coordinates[0], radius, centerX, centerY);
-        } else if (feature.geometry.type === 'MultiPolygon') {
-          feature.geometry.coordinates.forEach(polygon => {
-            drawVectorPolygon(polygon[0], radius, centerX, centerY);
-          });
-        }
-      });
+      // Draw boundary lines
+      if (geoData.boundaries?.features) {
+        ctx.strokeStyle = 'rgba(255, 152, 0, 0.3)';
+        ctx.lineWidth = 0.25;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        geoData.boundaries.features.forEach(feature => {
+          if (feature.geometry.type === 'LineString') {
+            drawVectorLine(feature.geometry.coordinates, radius, centerX, centerY);
+          } else if (feature.geometry.type === 'MultiLineString') {
+            feature.geometry.coordinates.forEach(line => {
+              drawVectorLine(line, radius, centerX, centerY);
+            });
+          }
+        });
+      }
     }
 
-    function drawVectorPolygon(coordinates, radius, centerX, centerY) {
+    function drawVectorLine(coordinates, radius, centerX, centerY) {
       ctx.beginPath();
       let firstPoint = true;
       let lastPoint = null;
@@ -187,18 +212,6 @@ const GlobeComponent = ({ selectedLocation }) => {
         lastPoint = point;
         lastValidPoint = point;
       });
-
-      // Connect back to the start if possible
-      if (lastValidPoint && !firstPoint) {
-        const startPoint = coordinates[0];
-        const point = projectPoint(startPoint[1], startPoint[0], radius);
-        if (point) {
-          const dist = Math.hypot(point.x - lastValidPoint.x, point.y - lastValidPoint.y);
-          if (dist <= radius / 2) {
-            ctx.lineTo(centerX + point.x, centerY - point.y);
-          }
-        }
-      }
 
       ctx.stroke();
     }
@@ -243,10 +256,8 @@ const GlobeComponent = ({ selectedLocation }) => {
         ctx.stroke();
       }
 
-      // Draw map vectors if data is available
-      if (geoDataRef.current) {
-        drawMapVectors(radius, centerX, centerY);
-      }
+      // Draw map vectors
+      drawMapVectors(radius, centerX, centerY);
 
       // Draw special reference lines
       drawSpecialLine(0, '#0891b2', radius, centerX, centerY);
@@ -291,7 +302,7 @@ const GlobeComponent = ({ selectedLocation }) => {
     return () => {
       resizeObserver.disconnect();
     };
-  }, [selectedLocation]);
+  }, [selectedLocation, geoData]);
 
   return (
     <div ref={containerRef} className="relative w-full h-full">
