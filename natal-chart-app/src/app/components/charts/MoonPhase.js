@@ -44,6 +44,8 @@ const MoonPhase = ({ chartData }) => {
     const phase = calculateMoonPhase();
     if (!phase) return;
 
+    console.log(phase.illumination, phase.angle, phase.isWaxing)
+
     const size = canvas.width;
     const radius = size / 3;
     const centerX = size / 2;
@@ -58,29 +60,25 @@ const MoonPhase = ({ chartData }) => {
     ctx.fillStyle = 'cyan'; // Base moon color
     ctx.fill();
 
-    // Draw phase shadow
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, -Math.PI/2, Math.PI/2, true);
-    
-    // Calculate shadow curve based on phase
     const phaseAngle = phase.angle;
-    const curveX = centerX + radius * Math.cos((phaseAngle) * Math.PI / 180);
-    
+
+    ctx.beginPath();
+
+    let curveX
+
     if (phaseAngle < 180) {
-      // Waxing phase
-      ctx.bezierCurveTo(
+        ctx.arc(centerX, centerY, radius, -Math.PI/2, Math.PI/2, true);
+        curveX = centerX + radius * Math.cos((phaseAngle) * Math.PI / 180);
+      } else {
+        ctx.arc(centerX, centerY, radius, -Math.PI/2, Math.PI/2, false);
+        curveX = centerX - radius * Math.cos((phaseAngle) * Math.PI / 180);
+      }
+    
+    ctx.bezierCurveTo(
         curveX, centerY + radius,
         curveX, centerY - radius,
         centerX, centerY - radius
-      );
-    } else {
-      // Waning phase
-      ctx.bezierCurveTo(
-        centerX + radius, centerY + radius,
-        centerX + radius, centerY - radius,
-        centerX, centerY - radius
-      );
-    }
+    );
     
     ctx.fillStyle = '#0f172a'; // Shadow color
     ctx.fill();
@@ -110,14 +108,14 @@ const MoonPhase = ({ chartData }) => {
       {moonPhase && (
         // <div className="text-center">
         <div className="text-center">
-          {/* <div className="text-cyan-300 font-medium mb-1">{moonPhase.name}</div> */}
-          {/* <div className="text-cyan-400/70 text-sm"> */}
-            {/* {(moonPhase.illumination * 100).toFixed(1)}% illuminated */}
-          {/* </div> */}
+          <div className="text-cyan-300 font-medium mb-1">{moonPhase.name}</div>
+          <div className="text-cyan-400/70 text-sm">
+            {(moonPhase.illumination * 100).toFixed(1)}% illuminated
+          </div>
           
-          {/* <div className="text-cyan-400/70 text-sm"> */}
-            {/* {moonPhase.angle.toFixed(1)}° phase angle */}
-          {/* </div> */}
+          <div className="text-cyan-400/70 text-sm">
+            {moonPhase.angle.toFixed(1)}° phase angle
+          </div>
         </div>
       )}
     </div>
