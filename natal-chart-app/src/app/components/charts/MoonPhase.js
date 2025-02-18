@@ -20,14 +20,15 @@ const MoonPhase = ({ chartData }) => {
 
     // Determine phase name
     let phaseName;
-    if (phaseAngle < 45) phaseName = "New Moon";
+    if (phaseAngle < 12) phaseName = "New Moon";
     else if (phaseAngle < 90) phaseName = "Waxing Crescent";
     else if (phaseAngle < 135) phaseName = "First Quarter";
-    else if (phaseAngle < 180) phaseName = "Waxing Gibbous";
-    else if (phaseAngle < 225) phaseName = "Full Moon";
+    else if (phaseAngle < 172) phaseName = "Waxing Gibbous";
+    else if (phaseAngle < 198) phaseName = "Full Moon";
     else if (phaseAngle < 270) phaseName = "Waning Gibbous";
     else if (phaseAngle < 315) phaseName = "Last Quarter";
-    else phaseName = "Waning Crescent";
+    else if (phaseAngle < 345) phaseName = "Waning Crescent";
+    else phaseName = "New Moon";
 
     return {
       angle: phaseAngle,
@@ -54,11 +55,28 @@ const MoonPhase = ({ chartData }) => {
     // Clear canvas
     ctx.clearRect(0, 0, size, size);
 
+    const moonGradient = ctx.createRadialGradient(
+        centerX, centerY, radius * 0.5,
+        centerX, centerY, radius
+      );
+      moonGradient.addColorStop(0, '#06b6d4');  // Brighter cyan in center
+      moonGradient.addColorStop(0.8, '#0891b2'); // Medium cyan
+
+
     // Draw moon circle
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    ctx.fillStyle = 'cyan'; // Base moon color
+    ctx.fillStyle = moonGradient; // Base moon color
     ctx.fill();
+
+    ctx.shadowColor = 'rgba(251, 146, 60, 0.5)';
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(251, 146, 60, 0.7)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.shadowBlur = 15;
 
     const phaseAngle = phase.angle;
 
@@ -66,12 +84,28 @@ const MoonPhase = ({ chartData }) => {
 
     let curveX
 
-    if (phaseAngle < 180) {
+    if (phase.illumination >= 0.99) {
+        return;
+     } else if (phase.illumination <= 0.01) {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = '#0f172a';  // Shadow color
+        ctx.fill();
+        ctx.shadowColor = 'rgba(251, 146, 60, 0.5)';
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = 'rgba(251, 146, 60, 0.7)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.shadowBlur = 15;
+        return;
+     } else if (phaseAngle < 180) {
         ctx.arc(centerX, centerY, radius, -Math.PI/2, Math.PI/2, true);
-        curveX = centerX + radius * Math.cos((phaseAngle) * Math.PI / 180);
+        curveX = centerX + radius * Math.cos((phase.illumination) * Math.PI );
       } else {
         ctx.arc(centerX, centerY, radius, -Math.PI/2, Math.PI/2, false);
-        curveX = centerX - radius * Math.cos((phaseAngle) * Math.PI / 180);
+        curveX = centerX - radius * Math.cos((phase.illumination) * Math.PI );
       }
     
     ctx.bezierCurveTo(
@@ -83,12 +117,6 @@ const MoonPhase = ({ chartData }) => {
     ctx.fillStyle = '#0f172a'; // Shadow color
     ctx.fill();
 
-    // Add glow effect
-    ctx.shadowColor = '#06b6d4';
-    ctx.shadowBlur = 15;
-    ctx.strokeStyle = '#06b6d4';
-    ctx.lineWidth = 2;
-    ctx.stroke();
   }, [chartData]);
 
   const moonPhase = calculateMoonPhase();
