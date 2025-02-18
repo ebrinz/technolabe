@@ -212,7 +212,7 @@ const GlobeComponent = ({ selectedLocation }) => {
         lastPoint = point;
         lastValidPoint = point;
       });
-
+      ctx.lineWidth = 1;
       ctx.stroke();
     }
 
@@ -230,7 +230,7 @@ const GlobeComponent = ({ selectedLocation }) => {
       // Draw globe background
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-      ctx.fillStyle = '#111827';
+      ctx.fillStyle = '#0000004D';
       ctx.fill();
       ctx.strokeStyle = '#0891b2';
       ctx.lineWidth = 1;
@@ -307,9 +307,9 @@ const GlobeComponent = ({ selectedLocation }) => {
   return (
     <div ref={containerRef} className="relative w-full h-full">
       <canvas ref={canvasRef} />
-      <div className="absolute bottom-2 left-2 text-cyan-300 text-sm">
-        Lat: {selectedLocation.lat.toFixed(2)}° Lng: {selectedLocation.lng.toFixed(2)}°
-      </div>
+      {/* <div className="absolute bottom-2 left-2 text-cyan-300 text-sm"> */}
+        {/* Lat: {selectedLocation.lat.toFixed(2)}° Lng: {selectedLocation.lng.toFixed(2)}° */}
+      {/* </div> */}
     </div>
   );
 };

@@ -136,14 +136,14 @@ const MoonPhase = ({ chartData }) => {
       {moonPhase && (
         // <div className="text-center">
         <div className="text-center">
-          <div className="text-cyan-300 font-medium mb-1">{moonPhase.name}</div>
-          <div className="text-cyan-400/70 text-sm">
-            {(moonPhase.illumination * 100).toFixed(1)}% illuminated
-          </div>
+          {/* <div className="text-cyan-300 font-medium mb-1">{moonPhase.name}</div> */}
+          {/* <div className="text-cyan-400/70 text-sm"> */}
+            {/* {(moonPhase.illumination * 100).toFixed(1)}% illuminated */}
+          {/* </div> */}
           
-          <div className="text-cyan-400/70 text-sm">
-            {moonPhase.angle.toFixed(1)}° phase angle
-          </div>
+          {/* <div className="text-cyan-400/70 text-sm"> */}
+            {/* {moonPhase.angle.toFixed(1)}° phase angle */}
+          {/* </div> */}
         </div>
       )}
     </div>

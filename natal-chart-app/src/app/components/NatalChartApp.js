@@ -20,12 +20,12 @@ const roundCoordinate = (value, precision = 4) => {
 
 const NatalChartApp = () => {
   const [selectedLocation, setSelectedLocation] = useState({ lat: 40.7128, lng: -74.0060 });
-  const [selectedDate, setSelectedDate] = useState('2000-01-01');
+  const [selectedDate, setSelectedDate] = useState('2025-01-01');
   const [selectedTime, setSelectedTime] = useState('12:00');
   const [chart, setChart] = useState(null);
   const [selectedPlanet, setSelectedPlanet] = useState(null);
-  const [minDate, setMinDate] = useState('1900-01-01');
-  const [maxDate, setMaxDate] = useState('2100-12-31');
+  const [minDate, setMinDate] = useState('2025-01-01');
+  const [maxDate, setMaxDate] = useState('2025-12-31');
 
   useEffect(() => {
     if (selectedLocation) {
@@ -93,10 +93,10 @@ const NatalChartApp = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 bg-gray-900">
-      <div className="grid grid-cols-5 gap-4">
+    <div className="h-screen overflow-hidden bg-gray-900 p-4">
+      <div className="grid grid-cols-5 gap-4 h-full max-h-full">
         {/* Left column - 2 columns wide */}
-        <div className="col-span-2 space-y-4">
+        <div className="col-span-2 space-y-4 h-full overflow-y-auto pr-2">
           <div className="bg-black/50 backdrop-blur-sm rounded-lg shadow-lg shadow-cyan-500/20 p-4 border border-cyan-500/20">
             <DateControls
               selectedDate={selectedDate}
@@ -108,7 +108,7 @@ const NatalChartApp = () => {
               onBoundsChange={handleDateBoundsChange}
             />
           </div>
-
+  
           <LocationControls 
             selectedLocation={selectedLocation}
             onLocationChange={handleLocationChange}
@@ -117,53 +117,51 @@ const NatalChartApp = () => {
           <ChartDataDisplay chartData={chart} />
         </div>
         
-        {/* Right column - 3 columns wide */}
-        {/* <div className="col-span-3 bg-black/30 backdrop-blur-sm rounded-lg shadow-lg shadow-cyan-500/20 p-4 border border-cyan-500/20"> */}
-        <div className="col-span-3 bg-black/30 rounded-lg shadow-lg shadow-cyan-500/20 p-4 border border-cyan-500/20">
-          <div className="flex gap-4 mb-4 ">
-            <div className="flex-row bg-black/30">
-              {/* globe */}
-              <div className="h-64 bg-black/30">
-                <GlobeComponent 
-                  selectedLocation={selectedLocation}
-                  onLocationChange={handleLocationChange}
-                />
-
-              </div>
-
-              {/* Moon Phase */}
-              <div className="w-32">
-                <MoonPhase chartData={chart} />
-              </div>
-
-              <div className="w-32">
-                <TimeDial time={selectedTime} />
-              </div>
-
-            </div>
-
-            
-            {/* Main chart area */}
-            {/* <div className="flex-1 bg-black/30 rounded-lg p-4 border border-cyan-500/10"> */}
-            <div className="flex-1 bg-black/30">
+        <div className="col-span-3 bg-black/30 rounded-lg shadow-lg shadow-cyan-500/20 p-4 border border-cyan-500/20 h-full">
+          <div className="relative h-full">
+            {/* Main Astral Chart - expanded to fill entire area */}
+            <div className="w-full h-full bg-black/30 rounded-lg">
               <AstralChart
                 chartData={chart}
                 selectedPlanet={selectedPlanet}
                 onPlanetSelect={setSelectedPlanet}
               />
             </div>
-         
-
+            
+            {/* Moon Phase overlay - positioned in top left */}
+            <div className="absolute top-7 right-7 w-24 h-24 sm:w-44 sm:h-44 md:w-78 md:h-78 lg:w-92 lg:h-92
+                            bg-black/00 rounded-full flex items-center justify-center 
+                            border-0 border-gray-700/00 z-10">
+              <div className="w-full h-full flex items-center justify-center">
+                <MoonPhase chartData={chart} />
+              </div>
+            </div>
+            
+            {/* Globe - positioned at bottom left - LARGER SIZE */}
+            <div className="absolute bottom-3 -left-12 w-32 h-32 sm:w-40 sm:h-40 md:w-46 md:h-46 lg:w-52 lg:h-52
+                          bg-black/00 rounded-full flex items-center justify-center
+                          border-0 border-gray-700/00 z-10">
+              <div className="w-full h-full flex items-center justify-center">
+                <GlobeComponent 
+                  selectedLocation={selectedLocation}
+                  onLocationChange={handleLocationChange}
+                />
+              </div>
+            </div>
+            
+            {/* Time Dial - positioned at bottom right */}
+            <div className="absolute bottom-4 right-4 w-20 h-20 sm:w-44 sm:h-44 md:w-62 md:h-62 lg:w-86 lg:h-86
+                          bg-black/00 rounded-full flex items-center justify-center
+                          border-0 border-gray-700/00 z-10">
+              <div className="w-full h-full flex items-center justify-center">
+                <TimeDial time={selectedTime} />
+              </div>
+            </div>
           </div>
-
-          {/* <PlanetInfo
-            selectedPlanet={selectedPlanet}
-            planetData={chart?.points[selectedPlanet]}
-          /> */}
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default NatalChartApp;
