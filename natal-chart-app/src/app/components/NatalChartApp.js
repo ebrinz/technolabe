@@ -8,6 +8,8 @@ import ChartDataDisplay from './charts/ChartDataDisplay';
 import MoonPhase from './charts/MoonPhase';
 import TimeDial from './charts/TimeDial';
 import GlobeComponent from './charts/GlobeComponent';
+import TechnolabeTitle from './TechnolabeTitle';
+import BackgroundEffects from './BackgroundEffects';
 
 const LATITUDE_BOUNDS = {
   min: -66.5,  // Antarctic Circle
@@ -110,12 +112,16 @@ const NatalChartApp = () => {
   };
 
   return (
+    
     <div className="h-screen overflow-hidden bg-black p-4">
+      <div className="fixed inset-0 z-[-1]">
+        <BackgroundEffects />
+      </div>
       <div className="grid grid-cols-6 gap-4 h-full">
         {/* Left column - 1 column for controls */}
         <div className="col-span-2 h-full pr-2 flex flex-col">
-          <div className="flex-grow-[3.3333333333333333333] overflow-auto bg-black/20 rounded-lg p-4 mb-4">
-            TECHNOLABE!!!
+          <div className="flex-grow-[3.3333333333333333333] overflow-visible bg-black/20 p-4 mb-4 relative">
+            <TechnolabeTitle />
           </div>
           
           <div className="flex flex-col flex-grow-[1] space-y-4">
