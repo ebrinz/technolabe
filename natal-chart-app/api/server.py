@@ -1,34 +1,34 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from natal import AstroChart
-import traceback
+# from flask import Flask, request, jsonify
+# from flask_cors import CORS
+# from natal import AstroChart
+# import traceback
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": ["http://localhost:3001", "http://localhost:3000"]}})
+# app = Flask(__name__)
+# CORS(app, resources={r"/*": {"origins": ["http://localhost:3001", "http://localhost:3000"]}})
 
-@app.route('/chart', methods=['POST'])
-def get_natal_chart():
-    try:
-        data = request.json
-        print("Received data:", data)
+# @app.route('/chart', methods=['POST'])
+# def get_natal_chart():
+#     try:
+#         data = request.json
+#         print("Received data:", data)
         
-        chart = AstroChart(
-            data['date'].replace('-', '/'),
-            data['time'],
-            float(data['lat']), 
-            float(data['lon'])
-        )
+#         chart = AstroChart(
+#             data['date'].replace('-', '/'),
+#             data['time'],
+#             float(data['lat']), 
+#             float(data['lon'])
+#         )
         
-        result = {
-            'planets': chart.get_planet_positions(),
-            'houses': chart.get_houses(),
-            'aspects': chart.get_aspects()
-        }
-        return jsonify(result)
+#         result = {
+#             'planets': chart.get_planet_positions(),
+#             'houses': chart.get_houses(),
+#             'aspects': chart.get_aspects()
+#         }
+#         return jsonify(result)
         
-    except Exception as e:
-        print(traceback.format_exc())
-        return jsonify({"error": str(e)}), 500
+#     except Exception as e:
+#         print(traceback.format_exc())
+#         return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+# if __name__ == '__main__':
+#     app.run(debug=True, port=5000)

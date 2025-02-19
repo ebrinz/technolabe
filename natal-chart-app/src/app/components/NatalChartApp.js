@@ -14,8 +14,21 @@ const LATITUDE_BOUNDS = {
   max: 66.5    // Arctic Circle
 };
 
-const roundCoordinate = (value, precision = 4) => {
-  return parseFloat(value.toFixed(precision));
+const calculateTimeFromLongitude = (longitude, baseTime = '12:00') => {
+  const hourOffset = longitude / 15;
+  const [baseHours, baseMinutes] = baseTime.split(':').map(Number);
+  let hours = baseHours + Math.floor(hourOffset);
+  let minutes = baseMinutes + Math.round((hourOffset % 1) * 60);
+  if (minutes >= 60) {
+    hours += 1;
+    minutes = minutes % 60;
+  } else if (minutes < 0) {
+    hours -= 1;
+    minutes = 60 + minutes;
+  }
+  while (hours < 0) hours += 24;
+  hours = hours % 24;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 };
 
 const NatalChartApp = () => {
@@ -61,7 +74,7 @@ const NatalChartApp = () => {
       }
       
       const data = await response.json();
-      console.log('NEW DATA', data)
+      console.log('NEW DATA', data);
       setChart(data);
     } catch (error) {
       console.error('Error fetching chart data:', error);
@@ -84,44 +97,54 @@ const NatalChartApp = () => {
   };
 
   const handleLocationChange = (newLoc) => {
-    const locationToUpdate = typeof newLoc === 'function' ? newLoc(selectedLocation) : newLoc;
-    
+    const locationToUpdate = typeof newLoc === 'function' 
+      ? newLoc(selectedLocation) 
+      : newLoc;
     const validatedLoc = {
       lat: Math.max(LATITUDE_BOUNDS.min, Math.min(LATITUDE_BOUNDS.max, locationToUpdate.lat)),
       lng: Math.max(-180, Math.min(180, locationToUpdate.lng))
     };
     setSelectedLocation(validatedLoc);
+    const newTime = calculateTimeFromLongitude(validatedLoc.lng);
+    setSelectedTime(newTime);
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-gray-900 p-4">
-      <div className="grid grid-cols-5 gap-4 h-full max-h-full">
-        {/* Left column - 2 columns wide */}
-        <div className="col-span-2 space-y-4 h-full overflow-y-auto pr-2">
-          <div className="bg-black/50 backdrop-blur-sm rounded-lg shadow-lg shadow-cyan-500/20 p-4 border border-cyan-500/20">
-            <DateControls
-              selectedDate={selectedDate}
-              selectedTime={selectedTime}
-              minDate={minDate}
-              maxDate={maxDate}
-              onDateChange={setSelectedDate}
-              onTimeChange={setSelectedTime}
-              onBoundsChange={handleDateBoundsChange}
-            />
+    <div className="h-screen overflow-hidden bg-black p-4">
+      <div className="grid grid-cols-6 gap-4 h-full">
+        {/* Left column - 1 column for controls */}
+        <div className="col-span-2 h-full pr-2 flex flex-col">
+          <div className="flex-grow-[3.3333333333333333333] overflow-auto bg-black/20 rounded-lg p-4 mb-4">
+            TECHNOLABE!!!
           </div>
-  
-          <LocationControls 
-            selectedLocation={selectedLocation}
-            onLocationChange={handleLocationChange}
-          />
           
-          <ChartDataDisplay chartData={chart} />
+          <div className="flex flex-col flex-grow-[1] space-y-4">
+            <div className="bg-black/50 backdrop-blur-sm p-4 rounded-lg">
+              <DateControls
+                selectedDate={selectedDate}
+                selectedTime={selectedTime}
+                minDate={minDate}
+                maxDate={maxDate}
+                onDateChange={setSelectedDate}
+                onTimeChange={setSelectedTime}
+                onBoundsChange={handleDateBoundsChange}
+              />
+            </div>
+            
+            <div className="flex-shrink-0">
+              <LocationControls 
+                selectedLocation={selectedLocation}
+                onLocationChange={handleLocationChange}
+              />
+            </div>
+          </div>
         </div>
         
-        <div className="col-span-3 bg-black/30 rounded-lg shadow-lg shadow-cyan-500/20 p-4 border border-cyan-500/20 h-full">
-          <div className="relative h-full">
+        {/* Chart column - 4 columns wide */}
+        <div className="col-span-4 bg-black/30 p-4 flex flex-col h-full">
+          <div className="relative flex-1 w-full">
             {/* Main Astral Chart - expanded to fill entire area */}
-            <div className="w-full h-full bg-black/30 rounded-lg">
+            <div className="absolute inset-0 bg-black/30 rounded-lg">
               <AstralChart
                 chartData={chart}
                 selectedPlanet={selectedPlanet}
@@ -129,8 +152,8 @@ const NatalChartApp = () => {
               />
             </div>
             
-            {/* Moon Phase overlay - positioned in top left */}
-            <div className="absolute top-7 right-7 w-24 h-24 sm:w-44 sm:h-44 md:w-78 md:h-78 lg:w-92 lg:h-92
+            {/* Moon Phase overlay - positioned in top right */}
+            <div className="absolute top-7 right-7 w-24 h-24 sm:w-36 sm:h-36 md:w-44 md:h-44 lg:w-52 lg:h-52
                             bg-black/00 rounded-full flex items-center justify-center 
                             border-0 border-gray-700/00 z-10">
               <div className="w-full h-full flex items-center justify-center">
@@ -139,7 +162,7 @@ const NatalChartApp = () => {
             </div>
             
             {/* Globe - positioned at bottom left - LARGER SIZE */}
-            <div className="absolute bottom-3 -left-12 w-32 h-32 sm:w-40 sm:h-40 md:w-46 md:h-46 lg:w-52 lg:h-52
+            <div className="absolute bottom-3 left-3 w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56
                           bg-black/00 rounded-full flex items-center justify-center
                           border-0 border-gray-700/00 z-10">
               <div className="w-full h-full flex items-center justify-center">
@@ -151,9 +174,8 @@ const NatalChartApp = () => {
             </div>
             
             {/* Time Dial - positioned at bottom right */}
-            <div className="absolute bottom-4 right-4 w-20 h-20 sm:w-44 sm:h-44 md:w-62 md:h-62 lg:w-86 lg:h-86
-                          bg-black/00 rounded-full flex items-center justify-center
-                          border-0 border-gray-700/00 z-10">
+            <div className="absolute bottom-4 right-4 w-20 h-20 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48
+                          bg-black/00 flex items-center justify-center z-10">
               <div className="w-full h-full flex items-center justify-center">
                 <TimeDial time={selectedTime} />
               </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 
-const TimeDial = ({ time = "12:00" }) => {
+const TimeDial = ({ time = "12:00", linkedToLocation = true }) => {
   const [mounted, setMounted] = useState(false);
   
   useEffect(() => {

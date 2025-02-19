@@ -3,7 +3,7 @@ import React from 'react';
 import GlobeComponent from './GlobeComponent';
 
 export const LocationControls = ({ selectedLocation, onLocationChange }) => (
-  <div className="bg-black/50 backdrop-blur-sm rounded-lg shadow-lg shadow-cyan-500/20 p-4 border border-cyan-500/20">
+  <div className="bg-black/50 backdrop-blur-sm">
     {/* <div className="h-64 rounded-lg mb-4 bg-black/30">
       <GlobeComponent 
         selectedLocation={selectedLocation}
@@ -16,7 +16,7 @@ export const LocationControls = ({ selectedLocation, onLocationChange }) => (
       <div>
         <div className="flex justify-between text-cyan-300 text-sm mb-1">
           <span>Latitude: {selectedLocation.lat.toFixed(4)}°</span>
-          <span className="text-cyan-500/70">-90° to 90°</span>
+          <span className="text-cyan-500/70">-66.5° to 66.5°</span>
         </div>
         <input
           type="range"

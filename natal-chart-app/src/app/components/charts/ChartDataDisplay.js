@@ -79,7 +79,7 @@ const ChartDataDisplay = ({ chartData }) => {
   };
 
   return (
-    <div className="bg-black/50 backdrop-blur-sm rounded-lg shadow-lg shadow-cyan-500/20 p-4 border border-cyan-500/20 mt-4 max-h-[500px] overflow-auto">
+    <div className="bg-black/50 backdrop-blur-sm p-4 mt-4 max-h-[500px] overflow-auto">
       {renderPlanetData(chartData.points)}
       {renderAspects(chartData.aspects)}
       {renderSection('Houses', chartData.houses)}
