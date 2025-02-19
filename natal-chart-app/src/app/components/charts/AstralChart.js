@@ -95,7 +95,9 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
     };
   });
 
-  const planets = Object.entries(chartData.points).map(([planet, data]) => ({
+  const planets = Object.entries(chartData.points || {})
+  .filter(([planet, data]) => data && data.longitude !== undefined)
+  .map(([planet, data]) => ({
     symbol: PLANET_SYMBOLS[planet] || planet,
     name: planet,
     longitude: data.longitude,
@@ -121,6 +123,31 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
           <feMerge>
             <feMergeNode in="coloredBlur"/>
             <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        
+        {/* Animated glow filter for aspects */}
+        <filter id="animatedGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur">
+            <animate 
+              attributeName="stdDeviation" 
+              values="2;6;2" 
+              dur="4s" 
+              repeatCount="indefinite" 
+            />
+          </feGaussianBlur>
+          <feColorMatrix
+            in="blur"
+            mode="matrix"
+            values="1 0 0 0 0
+                    0 1 0 0 0
+                    0 0 1 0 0
+                    0 0 0 18 -7"
+            result="glow"
+          />
+          <feMerge>
+            <feMergeNode in="glow" />
+            <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
       </defs>
@@ -286,12 +313,15 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
         );
       })}
 
-      {/* Aspects */}
+      {/* Animated Aspects */}
       {chartData.aspects.map((aspect, i) => {
         const planet1 = planets.find(p => p.name === aspect.planet1);
         const planet2 = planets.find(p => p.name === aspect.planet2);
         if (!planet1 || !planet2) return null;
-
+        
+        // Different animation delay for each aspect based on aspect type and planets
+        const animDelay = (i * 0.7) % 5;
+        
         return (
           <line 
             key={`aspect-${i}`}
@@ -300,14 +330,24 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
             x2={planet2.position.x}
             y2={planet2.position.y}
             stroke={ASPECT_COLORS[aspect.aspect_type]}
-            strokeWidth="2"
             opacity="0.9"
-            filter="url(#glow)"
-            style={{ 
-              filter: 'url(#glow)',
-              boxShadow: `0 0 10px ${ASPECT_COLORS[aspect.aspect_type]}`,
-            }}
-          />
+            filter="url(#animatedGlow)"
+          >
+            <animate
+              attributeName="stroke-width"
+              values="1.5;3;1.5"
+              dur="3s"
+              begin={`${animDelay}s`}
+              repeatCount="indefinite"
+            />
+            <animate
+              attributeName="opacity"
+              values="0.95;0.5;0.95"
+              dur="3s"
+              begin={`${animDelay}s`}
+              repeatCount="indefinite"
+            />
+          </line>
         );
       })}
 

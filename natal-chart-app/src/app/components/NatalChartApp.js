@@ -61,6 +61,7 @@ const NatalChartApp = () => {
       }
       
       const data = await response.json();
+      console.log('NEW DATA', data)
       setChart(data);
     } catch (error) {
       console.error('Error fetching chart data:', error);
