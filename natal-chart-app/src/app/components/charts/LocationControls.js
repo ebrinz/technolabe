@@ -2,47 +2,69 @@
 import React from 'react';
 import GlobeComponent from './GlobeComponent';
 
-export const LocationControls = ({ selectedLocation, onLocationChange }) => (
-  <div className="bg-black/50 backdrop-blur-sm">
-    {/* <div className="h-64 rounded-lg mb-4 bg-black/30">
-      <GlobeComponent 
-        selectedLocation={selectedLocation}
-        onLocationChange={onLocationChange}
+const SliderControl = ({ label, value, min, max, onChange, unit = "°" }) => (
+  <div className="space-y-2">
+    <div className="flex justify-between text-sm">
+      <span className="text-cyan-300">
+        {label}: {value.toFixed(4)}{unit}
+      </span>
+      <span className="text-cyan-500/70">
+        {min}{unit} to {max}{unit}
+      </span>
+    </div>
+    <div className="relative">
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step="0.0001"
+        value={value}
+        onChange={onChange}
+        className="
+          w-full h-2 rounded-lg appearance-none cursor-pointer
+          bg-gradient-to-r from-black/40 to-black/60
+          border border-cyan-400/20
+          accent-cyan-500
+          hover:accent-cyan-400
+          focus:outline-none focus:ring-2 focus:ring-cyan-500/50
+        "
       />
-    </div> */}
-    
-    <div className="space-y-4 bg-black/30 p-4 rounded-lg">
+      <div className="absolute inset-0 blur-sm bg-cyan-400/10 rounded-lg pointer-events-none" />
+    </div>
+  </div>
+);
+
+export const LocationControls = ({ selectedLocation, onLocationChange }) => (
+  <div className="bg-black/20 backdrop-blur-sm">
+    <div className="space-y-4 p-4 rounded-lg border border-cyan-500/20">
       {/* Latitude Slider */}
-      <div>
-        <div className="flex justify-between text-cyan-300 text-sm mb-1">
-          <span>Latitude: {selectedLocation.lat.toFixed(4)}°</span>
-          <span className="text-cyan-500/70">-66.5° to 66.5°</span>
-        </div>
-        <input
-          type="range"
-          min="-90"
-          max="90"
-          step="0.0001"
-          value={selectedLocation.lat}
-          onChange={(e) => onLocationChange(prev => ({ ...prev, lat: parseFloat(e.target.value) }))}
-          className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-        />
-      </div>
+      <SliderControl
+        label="Latitude"
+        value={selectedLocation.lat}
+        min={-66.5}
+        max={66.5}
+        onChange={(e) => onLocationChange(prev => ({ 
+          ...prev, 
+          lat: parseFloat(e.target.value) 
+        }))}
+      />
       
       {/* Longitude Slider */}
-      <div>
-        <div className="flex justify-between text-cyan-300 text-sm mb-1">
-          <span>Longitude: {selectedLocation.lng.toFixed(4)}°</span>
-          <span className="text-cyan-500/70">-180° to 180°</span>
-        </div>
-        <input
-          type="range"
-          min="-180"
-          max="180"
-          step="0.0001"
-          value={selectedLocation.lng}
-          onChange={(e) => onLocationChange(prev => ({ ...prev, lng: parseFloat(e.target.value) }))}
-          className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+      <SliderControl
+        label="Longitude"
+        value={selectedLocation.lng}
+        min={-180}
+        max={180}
+        onChange={(e) => onLocationChange(prev => ({ 
+          ...prev, 
+          lng: parseFloat(e.target.value) 
+        }))}
+      />
+
+      <div className="mt-2 rounded-lg overflow-hidden border border-cyan-500/20">
+        <GlobeComponent 
+          selectedLocation={selectedLocation}
+          onLocationChange={onLocationChange}
         />
       </div>
     </div>
