@@ -8,6 +8,8 @@ import ChartDataDisplay from './charts/ChartDataDisplay';
 import MoonPhase from './charts/MoonPhase';
 import TimeDial from './charts/TimeDial';
 import GlobeComponent from './charts/GlobeComponent';
+
+import SaveAndPredict from './SaveAndPredict'
 import TechnolabeTitle from './TechnolabeTitle';
 import BackgroundEffects from './BackgroundEffects';
 
@@ -113,19 +115,19 @@ const NatalChartApp = () => {
 
   return (
     
-    <div className="h-screen overflow-hidden bg-black p-4">
+    <div className="h-screen overflow-hidden bg-black/60 p-4 relative">
       <div className="fixed inset-0 z-[-1]">
-        <BackgroundEffects />
+        {/* <BackgroundEffects /> */}
       </div>
       <div className="grid grid-cols-6 gap-4 h-full">
         {/* Left column - 1 column for controls */}
         <div className="col-span-2 h-full pr-2 flex flex-col">
-          <div className="flex-grow-[3.3333333333333333333] overflow-visible bg-black/20 p-4 mb-4 relative">
+          <div className="flex-grow-[3.69] overflow-visible bg-black/20 p-4 mb-4 relative">
             <TechnolabeTitle />
           </div>
           
           <div className="flex flex-col flex-grow-[1] space-y-4">
-            <div className="bg-black/50 backdrop-blur-sm p-4 rounded-lg">
+            <div className="bg-black/20 backdrop-blur-sm rounded-lg">
               <DateControls
                 selectedDate={selectedDate}
                 selectedTime={selectedTime}
@@ -137,20 +139,32 @@ const NatalChartApp = () => {
               />
             </div>
             
-            <div className="flex-shrink-0">
+            <div className="bg-black/20 backdrop-blur-sm rounded-lg">
               <LocationControls 
                 selectedLocation={selectedLocation}
                 onLocationChange={handleLocationChange}
+              />
+            </div>
+
+            <div className="bg-black/20 backdrop-blur-sm rounded-lg">
+              <SaveAndPredict 
+                chartData={chart}
+                selectedLocation={selectedLocation}
+                selectedDate={selectedDate}
+                selectedTime={selectedTime}
+                onLocationChange={handleLocationChange}
+                setSelectedDate={setSelectedDate}
+                setSelectedTime={setSelectedTime}
               />
             </div>
           </div>
         </div>
         
         {/* Chart column - 4 columns wide */}
-        <div className="col-span-4 bg-black/30 p-4 flex flex-col h-full">
+        <div className="col-span-4 bg-black/20 p-4 flex flex-col h-full">
           <div className="relative flex-1 w-full">
             {/* Main Astral Chart - expanded to fill entire area */}
-            <div className="absolute inset-0 bg-black/30 rounded-lg">
+            <div className="absolute inset-0">
               <AstralChart
                 chartData={chart}
                 selectedPlanet={selectedPlanet}
