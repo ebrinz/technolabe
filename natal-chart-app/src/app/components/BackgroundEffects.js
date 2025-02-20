@@ -15,7 +15,7 @@ const BackgroundEffects = () => {
     });
   }, []);
 
-  // Particle configuration for a cosmic/starry background
+  // Particle configuration for Technolabe: Celestial Technology
   const particlesConfig = {
     fullScreen: {
       enable: true,
@@ -23,7 +23,7 @@ const BackgroundEffects = () => {
     },
     background: {
       color: {
-        value: "#000022" // Deep dark blue background
+        value: "#0a0a2a" // Deep cosmic dark blue
       }
     },
     fpsLimit: 120,
@@ -35,7 +35,7 @@ const BackgroundEffects = () => {
         },
         onClick: {
           enable: true,
-          mode: "push"
+          mode: "connect"
         },
         resize: {
           enable: true,
@@ -43,18 +43,27 @@ const BackgroundEffects = () => {
         }
       },
       modes: {
-        push: {
-          quantity: 4
+        connect: {
+          radius: 150,
+          links: {
+            opacity: 0.1
+          }
         },
         repulse: {
-          distance: 100,
-          duration: 0.4
+          distance: 200,
+          duration: 0.4,
+          speed: 0.1
         }
       }
     },
     particles: {
       color: {
-        value: "#ffffff" // White stars
+        value: [
+          "#00ffff",      // Bright Cyan
+          "#4169e1",      // Royal Blue
+          "#8a2be2",      // Blue Violet
+          "#ff1493"       // Deep Pink (for tech/circuit accent)
+        ]
       },
       move: {
         direction: "none",
@@ -63,41 +72,45 @@ const BackgroundEffects = () => {
           default: "out"
         },
         random: true,
-        speed: 1,
-        straight: false
+        speed: {
+          min: 0.1,
+          max: 1
+        },
+        straight: false,
+        drift: {
+          min: -0.5,
+          max: 0.5
+        }
       },
       number: {
         density: {
           enable: true,
           area: 800
         },
-        value: 300 // Increased number of particles
+        value: 500 // High particle count for dense, technological feel
       },
       opacity: {
-        value: 0.5,
-        random: {
-          enable: true,
-          minimumValue: 0.1
-        },
+        value: { min: 0.1, max: 0.7 },
         animation: {
           enable: true,
-          speed: 1,
+          speed: 0.1,
           minimumValue: 0.1,
           sync: false
         }
       },
       shape: {
-        type: "circle"
+        type: ["circle", "triangle", "polygon"],
+        options: {
+          polygon: {
+            sides: 5 // Pentagonal shapes for a tech/circuit feel
+          }
+        }
       },
       size: {
-        value: { min: 1, max: 3 },
-        random: {
-          enable: true,
-          minimumValue: 0.5
-        },
+        value: { min: 1, max: 4 },
         animation: {
           enable: true,
-          speed: 10,
+          speed: 0.1,
           minimumValue: 0.5,
           sync: false
         }
@@ -105,26 +118,78 @@ const BackgroundEffects = () => {
       links: {
         enable: true,
         distance: 150,
-        color: "#ffffff",
-        opacity: 0.1,
-        width: 1
+        color: {
+          value: "#00ffff" // Cyan connecting lines
+        },
+        opacity: 0.3,
+        width: 1,
+        triangles: {
+          enable: true,
+          color: "#4169e1",
+          opacity: 0.1
+        }
+      },
+      rotate: {
+        value: { min: 0, max: 360 },
+        direction: "random",
+        animation: {
+          enable: true,
+          speed: 0.1,
+          sync: false
+        }
+      },
+      twinkle: {
+        lines: {
+          enable: true,
+          color: "#8a2be2",
+          opacity: 0.5
+        },
+        particles: {
+          enable: true,
+          color: "#00ffff",
+          opacity: 0.1,
+          animation: {
+            enable: true,
+            speed: 0.1,
+            sync: false
+          }
+        }
+      },
+      wobble: {
+        enable: true,
+        distance: 10,
+        speed: 1
       }
     },
     detectRetina: true,
+    responsive: [
+      {
+        maxWidth: 500,
+        options: {
+          particles: {
+            number: {
+              value: 250
+            }
+          }
+        }
+      }
+    ],
+    // Add some themes for additional visual interest
     themes: [
       {
-        name: 'light',
+        name: "light-circuit",
         default: {
           value: true,
-          mode: 'light'
+          mode: "light"
         },
         options: {
-          background: {
-            color: "#ffffff"
-          },
           particles: {
             color: {
-              value: "#000000"
+              value: "#4169e1"
+            },
+            links: {
+              color: "#00ffff",
+              opacity: 0.1
             }
           }
         }
