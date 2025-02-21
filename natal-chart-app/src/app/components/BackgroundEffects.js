@@ -1,210 +1,153 @@
 'use client'
-import React, { useEffect, useState } from 'react';
-import { Particles } from '@tsparticles/react';
-import { initParticlesEngine } from '@tsparticles/react';
-import { loadSlim } from '@tsparticles/slim';
+import React, { useEffect, useRef } from 'react';
 
 const BackgroundEffects = () => {
-  const [init, setInit] = useState(false);
+  const canvasRef = useRef(null);
+  const starsRef = useRef([]);
+  const brightStarsRef = useRef([]);
+  const animationFrameRef = useRef(null);
 
-  // Initialization effect
   useEffect(() => {
-    initParticlesEngine(async (engine) => {
-      await loadSlim(engine);
-      setInit(true);
-    });
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+
+    const initCanvas = () => {
+      canvas.width = width;
+      canvas.height = height;
+    };
+
+    // Create stars with different properties for variety
+    const createStars = () => {
+      // Regular stars
+      starsRef.current = Array.from({ length: 150 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: Math.random() * 1.5 + 0.5,
+        speed: Math.random() * 0.3 + 0.1,
+        opacity: Math.random() * 0.5 + 0.3,
+        layer: Math.floor(Math.random() * 3)  // Different depth layers
+      }));
+
+      // Bright stars with glow effect
+      brightStarsRef.current = Array.from({ length: 15 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: Math.random() * 2 + 1,
+        speed: Math.random() * 0.2 + 0.05,
+        baseOpacity: Math.random() * 0.3 + 0.7,
+        glowSize: Math.random() * 4 + 2,
+        pulse: 0,
+        pulseSpeed: Math.random() * 0.03 + 0.01,
+        color: Math.random() > 0.5 ? '#add8e6' : '#ffffff'  // Mix of white and light blue
+      }));
+    };
+
+    const drawStar = (x, y, size, opacity) => {
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.fill();
+    };
+
+    const drawBrightStar = (star) => {
+      // Update pulse
+      star.pulse += star.pulseSpeed;
+      const pulseOpacity = Math.sin(star.pulse) * 0.2 + star.baseOpacity;
+
+      // Draw glow effect
+      const gradient = ctx.createRadialGradient(
+        star.x, star.y, 0,
+        star.x, star.y, star.glowSize * 2
+      );
+      gradient.addColorStop(0, `rgba(255, 255, 255, ${pulseOpacity})`);
+      gradient.addColorStop(0.3, `rgba(255, 255, 255, ${pulseOpacity * 0.3})`);
+      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+      ctx.beginPath();
+      ctx.fillStyle = gradient;
+      ctx.arc(star.x, star.y, star.glowSize * 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw star center
+      ctx.beginPath();
+      ctx.fillStyle = star.color;
+      ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Optional: Add cross light effect for extra brightness
+      ctx.strokeStyle = `rgba(255, 255, 255, ${pulseOpacity * 0.5})`;
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(star.x - star.glowSize, star.y);
+      ctx.lineTo(star.x + star.glowSize, star.y);
+      ctx.moveTo(star.x, star.y - star.glowSize);
+      ctx.lineTo(star.x, star.y + star.glowSize);
+      ctx.stroke();
+    };
+
+    const drawStars = () => {
+      ctx.clearRect(0, 0, width, height);
+      
+      // Draw regular stars by layer (creates depth effect)
+      [0, 1, 2].forEach(layer => {
+        starsRef.current
+          .filter(star => star.layer === layer)
+          .forEach(star => {
+            drawStar(star.x, star.y, star.size, star.opacity);
+            
+            // Move star based on layer (parallax effect)
+            star.y += star.speed * (layer + 1);
+
+            if (star.y > height) {
+              star.y = 0;
+              star.x = Math.random() * width;
+            }
+          });
+      });
+
+      // Draw bright stars
+      brightStarsRef.current.forEach(star => {
+        drawBrightStar(star);
+        
+        star.y += star.speed;
+        if (star.y > height) {
+          star.y = 0;
+          star.x = Math.random() * width;
+          star.pulse = 0;  // Reset pulse for smooth transition
+        }
+      });
+
+      animationFrameRef.current = requestAnimationFrame(drawStars);
+    };
+
+    const handleResize = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      initCanvas();
+      createStars();
+    };
+
+    initCanvas();
+    createStars();
+    drawStars();
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
   }, []);
 
-  // Particle configuration for Technolabe: Celestial Technology
-  const particlesConfig = {
-    fullScreen: {
-      enable: true,
-      zIndex: -1
-    },
-    background: {
-      color: {
-        value: "#0a0a2a" // Deep cosmic dark blue
-      }
-    },
-    fpsLimit: 120,
-    interactivity: {
-      events: {
-        onHover: {
-          enable: true,
-          mode: "repulse"
-        },
-        onClick: {
-          enable: true,
-          mode: "connect"
-        },
-        resize: {
-          enable: true,
-          delay: 0.5
-        }
-      },
-      modes: {
-        connect: {
-          radius: 150,
-          links: {
-            opacity: 0.1
-          }
-        },
-        repulse: {
-          distance: 200,
-          duration: 0.4,
-          speed: 0.1
-        }
-      }
-    },
-    particles: {
-      color: {
-        value: [
-          "#00ffff",      // Bright Cyan
-          "#4169e1",      // Royal Blue
-          "#8a2be2",      // Blue Violet
-          "#ff1493"       // Deep Pink (for tech/circuit accent)
-        ]
-      },
-      move: {
-        direction: "none",
-        enable: true,
-        outModes: {
-          default: "out"
-        },
-        random: true,
-        speed: {
-          min: 0.1,
-          max: 1
-        },
-        straight: false,
-        drift: {
-          min: -0.5,
-          max: 0.5
-        }
-      },
-      number: {
-        density: {
-          enable: true,
-          area: 800
-        },
-        value: 500 // High particle count for dense, technological feel
-      },
-      opacity: {
-        value: { min: 0.1, max: 0.7 },
-        animation: {
-          enable: true,
-          speed: 0.1,
-          minimumValue: 0.1,
-          sync: false
-        }
-      },
-      shape: {
-        type: ["circle", "triangle", "polygon"],
-        options: {
-          polygon: {
-            sides: 5 // Pentagonal shapes for a tech/circuit feel
-          }
-        }
-      },
-      size: {
-        value: { min: 1, max: 4 },
-        animation: {
-          enable: true,
-          speed: 0.1,
-          minimumValue: 0.5,
-          sync: false
-        }
-      },
-      links: {
-        enable: true,
-        distance: 150,
-        color: {
-          value: "#00ffff" // Cyan connecting lines
-        },
-        opacity: 0.3,
-        width: 1,
-        triangles: {
-          enable: true,
-          color: "#4169e1",
-          opacity: 0.1
-        }
-      },
-      rotate: {
-        value: { min: 0, max: 360 },
-        direction: "random",
-        animation: {
-          enable: true,
-          speed: 0.1,
-          sync: false
-        }
-      },
-      twinkle: {
-        lines: {
-          enable: true,
-          color: "#8a2be2",
-          opacity: 0.5
-        },
-        particles: {
-          enable: true,
-          color: "#00ffff",
-          opacity: 0.1,
-          animation: {
-            enable: true,
-            speed: 0.1,
-            sync: false
-          }
-        }
-      },
-      wobble: {
-        enable: true,
-        distance: 10,
-        speed: 1
-      }
-    },
-    detectRetina: true,
-    responsive: [
-      {
-        maxWidth: 500,
-        options: {
-          particles: {
-            number: {
-              value: 250
-            }
-          }
-        }
-      }
-    ],
-    // Add some themes for additional visual interest
-    themes: [
-      {
-        name: "light-circuit",
-        default: {
-          value: true,
-          mode: "light"
-        },
-        options: {
-          particles: {
-            color: {
-              value: "#4169e1"
-            },
-            links: {
-              color: "#00ffff",
-              opacity: 0.1
-            }
-          }
-        }
-      }
-    ]
-  };
-
-  if (!init) {
-    return null;
-  }
-
   return (
-    <Particles
-      id="tsparticles"
-      options={particlesConfig}
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none"
+      style={{ zIndex: -1 }}
     />
   );
 };

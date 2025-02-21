@@ -1,40 +1,14 @@
 'use client'
 import React, { useState } from 'react';
-import { ASPECT_COLORS } from '../../constants/aspectColors';
 
-const ZODIAC_SIGNS = [
-  { symbol: '♈', name: 'Aries', degree: 0 },
-  { symbol: '♉', name: 'Taurus', degree: 30 },
-  { symbol: '♊', name: 'Gemini', degree: 60 },
-  { symbol: '♋', name: 'Cancer', degree: 90 },
-  { symbol: '♌', name: 'Leo', degree: 120 },
-  { symbol: '♍', name: 'Virgo', degree: 150 },
-  { symbol: '♎', name: 'Libra', degree: 180 },
-  { symbol: '♏', name: 'Scorpio', degree: 210 },
-  { symbol: '♐', name: 'Sagittarius', degree: 240 },
-  { symbol: '♑', name: 'Capricorn', degree: 270 },
-  { symbol: '♒', name: 'Aquarius', degree: 300 },
-  { symbol: '♓', name: 'Pisces', degree: 330 }
-];
-
-const ROMAN_NUMERALS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
-
-const CUNEIFORM_NUMBERS = ['𒁹', '𒁹𒁹', '𒁹𒁹𒁹', '𒁹𒁹𒁹𒁹', '𒈠', '𒈠𒁹', '𒈠𒁹𒁹', '𒈠𒁹𒁹𒁹', '𒈠𒁹𒁹𒁹𒁹', '𒈦', '𒈦𒁹', '𒈦𒁹𒁹']
-
-const PLANET_SYMBOLS = {
-  'Sun': '☉',
-  'Moon': '☽',
-  'Mercury': '☿',
-  'Venus': '♀',
-  'Mars': '♂',
-  'Jupiter': '♃',
-  'Saturn': '♄',
-  'Uranus': '♅',
-  'Neptune': '♆',
-  'Pluto': '♇',
-  'North Node': '☊',
-  'South Node': '☋'
-};
+import { 
+  ROMAN_NUMERALS, 
+  CUNEIFORM_NUMBERS, 
+  MODERN_PLANETS, 
+  TRADITIONAL_PLANETS,
+  ZODIAC_SIGNS,
+  ASPECT_COLORS
+} from '../../constants/constants';
 
 const normalizeAngle = (angle) => {
   while (angle >= 360) angle -= 360;
@@ -47,11 +21,23 @@ const calculateMidpoint = (start, end) => {
   return normalizeAngle(mid);
 };
 
-const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
+const AstralChart = ({ 
+    chartData, 
+    selectedPlanet, 
+    onPlanetSelect,
+    useCuneiform = true,
+    useTraditional = false
+  }) => {
   const [hoveredSign, setHoveredSign] = useState(null);
   const [hoveredPlanet, setHoveredPlanet] = useState(null);
   
   if (!chartData?.points) return null;
+
+  // Get the appropriate number system
+  const HOUSE_NUMBERS = useCuneiform ? CUNEIFORM_NUMBERS : ROMAN_NUMERALS;
+  
+  // Get the appropriate planet set
+  const PLANET_SYMBOLS = useTraditional ? TRADITIONAL_PLANETS : MODERN_PLANETS;
 
   const radius = 140; // Slightly reduced from 150
   const center = { x: 200, y: 200 }; // Adjusted from 200,200
@@ -77,36 +63,41 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
   });
 
   const houseCusps = Object.entries(chartData.houses)
-  .map(([house, degree]) => { 
-    const houseNum = parseInt(house.replace('House', ''));
-    const nextHouseNum = (houseNum % 12) + 1;
-    const nextDegree = chartData.houses[`House${nextHouseNum}`] || chartData.houses.House1;
-    const midpointDegree = nextDegree < degree 
-      ? calculateMidpoint(degree, nextDegree + 360)
-      : calculateMidpoint(degree, nextDegree);
-    
-    return {
-      house: CUNEIFORM_NUMBERS[houseNum - 1], // Adjust index to be 0-based
-      startDegree: degree,
-      midpointDegree: normalizeAngle(midpointDegree),
-      position: degreesToXY(degree, radius),
-      labelPosition: degreesToXY(normalizeAngle(midpointDegree), houseLabelRadius),
-      rotation: getTextRotation(normalizeAngle(midpointDegree))
-    };
+    .map(([house, degree]) => { 
+      const houseNum = parseInt(house.replace('House', ''));
+      const nextHouseNum = (houseNum % 12) + 1;
+      const nextDegree = chartData.houses[`House${nextHouseNum}`] || chartData.houses.House1;
+      const midpointDegree = nextDegree < degree 
+        ? calculateMidpoint(degree, nextDegree + 360)
+        : calculateMidpoint(degree, nextDegree);
+      
+      return {
+        house: HOUSE_NUMBERS[houseNum - 1],
+        startDegree: degree,
+        midpointDegree: normalizeAngle(midpointDegree),
+        position: degreesToXY(degree, radius),
+        labelPosition: degreesToXY(normalizeAngle(midpointDegree), houseLabelRadius),
+        rotation: getTextRotation(normalizeAngle(midpointDegree))
+      };
   });
 
   const planets = Object.entries(chartData.points || {})
-  .filter(([planet, data]) => data && data.longitude !== undefined)
-  .map(([planet, data]) => ({
-    symbol: PLANET_SYMBOLS[planet] || planet,
-    name: planet,
-    longitude: data.longitude,
-    position: degreesToXY(data.longitude, radius * 0.8),
-    labelPosition: degreesToXY(data.longitude, planetLabelRadius),
-    house: data.house,
-    sign: data.sign,
-    movement: data.movement
-  }));
+    .filter(([planet, data]) => {
+      if (useTraditional) {
+        return TRADITIONAL_PLANETS.hasOwnProperty(planet);
+      }
+      return data && data.longitude !== undefined;
+    })
+    .map(([planet, data]) => ({
+      symbol: PLANET_SYMBOLS[planet] || planet,
+      name: planet,
+      longitude: data.longitude,
+      position: degreesToXY(data.longitude, radius * 0.8),
+      labelPosition: degreesToXY(data.longitude, planetLabelRadius),
+      house: data.house,
+      sign: data.sign,
+      movement: data.movement
+    }));
 
   return (
     <svg viewBox="0 0 400 400" className="w-full h-full">
@@ -118,6 +109,7 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
             <feMergeNode in="SourceGraphic"/>
           </feMerge>
         </filter>
+
         <filter id="orangeGlow">
           <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
           <feMerge>
@@ -125,6 +117,49 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
             <feMergeNode in="SourceGraphic"/>
           </feMerge>
         </filter>
+
+        {/* Enhanced animated glow filter for aspects */}
+        <filter id="enhancedGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur">
+            <animate 
+              attributeName="stdDeviation" 
+              values="1.5;3;1.5" 
+              dur="3s" 
+              repeatCount="indefinite" 
+            />
+          </feGaussianBlur>
+          <feColorMatrix
+            in="blur"
+            mode="matrix"
+            values="1 0 0 0 0
+                    0 1 0 0 0
+                    0 0 1 0 0
+                    0 0 0 12 -7"
+            result="glow"
+          />
+          <feMerge>
+            <feMergeNode in="glow" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+
+        {/* Create gradients for each aspect type */}
+        {Object.entries(ASPECT_COLORS).map(([aspectType, color]) => (
+          <linearGradient
+            key={`gradient-${aspectType}`}
+            id={`aspect-gradient-${aspectType}`}
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor={color} stopOpacity="1" />
+            <stop offset="50%" stopColor={color} stopOpacity="0.4" />
+            <stop offset="100%" stopColor={color} stopOpacity="1" />
+          </linearGradient>
+        ))}
+
+        {/* Create masks for varying line thickness */}
+        <mask id="aspectMask">
+          <rect x="0" y="0" width="400" height="400" fill="white" />
+        </mask>
         
         {/* Animated glow filter for aspects */}
         <filter id="animatedGlow" x="-50%" y="-50%" width="200%" height="200%">
@@ -314,7 +349,7 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
       })}
 
       {/* Animated Aspects */}
-      {chartData.aspects.map((aspect, i) => {
+      {/* {chartData.aspects.map((aspect, i) => {
         const planet1 = planets.find(p => p.name === aspect.planet1);
         const planet2 = planets.find(p => p.name === aspect.planet2);
         if (!planet1 || !planet2) return null;
@@ -349,7 +384,77 @@ const AstralChart = ({ chartData, selectedPlanet, onPlanetSelect }) => {
             />
           </line>
         );
-      })}
+      })} */}
+
+      {/* Enhanced Animated Aspects */}
+      <g className="aspects-layer">
+        {chartData.aspects.map((aspect, i) => {
+          const planet1 = planets.find(p => p.name === aspect.planet1);
+          const planet2 = planets.find(p => p.name === aspect.planet2);
+          if (!planet1 || !planet2) return null;
+
+          // Calculate the midpoint for the thin part
+          const midX = (planet1.position.x + planet2.position.x) / 2;
+          const midY = (planet1.position.y + planet2.position.y) / 2;
+
+          // Calculate the angle for proper gradient direction
+          const angle = Math.atan2(
+            planet2.position.y - planet1.position.y,
+            planet2.position.x - planet1.position.x
+          ) * 180 / Math.PI;
+
+          const animDelay = (i * 0.7) % 5;
+
+          return (
+            <g key={`aspect-${i}`}>
+              {/* Base thick line with gradient */}
+              <path
+                d={`M ${planet1.position.x} ${planet1.position.y} 
+                    Q ${midX} ${midY} ${planet2.position.x} ${planet2.position.y}`}
+                stroke={`url(#aspect-gradient-${aspect.aspect_type})`}
+                strokeWidth="4"
+                fill="none"
+                opacity="0.9"
+                style={{ filter: 'url(#enhancedGlow)' }}
+              >
+                <animate
+                  attributeName="stroke-width"
+                  values="4;6;4"
+                  dur="3s"
+                  begin={`${animDelay}s`}
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="opacity"
+                  values="0.9;0.6;0.9"
+                  dur="3s"
+                  begin={`${animDelay}s`}
+                  repeatCount="indefinite"
+                />
+              </path>
+
+              {/* Overlay thinner line for the center effect */}
+              <path
+                d={`M ${planet1.position.x} ${planet1.position.y} 
+                    Q ${midX} ${midY} ${planet2.position.x} ${planet2.position.y}`}
+                stroke={ASPECT_COLORS[aspect.aspect_type]}
+                strokeWidth="1"
+                fill="none"
+                opacity="0.8"
+                style={{ filter: 'url(#enhancedGlow)' }}
+              >
+                <animate
+                  attributeName="opacity"
+                  values="0.8;0.4;0.8"
+                  dur="3s"
+                  begin={`${animDelay}s`}
+                  repeatCount="indefinite"
+                />
+              </path>
+            </g>
+          );
+        })}
+      </g>
 
       {/* Planets */}
       {planets.map((planet, i) => (

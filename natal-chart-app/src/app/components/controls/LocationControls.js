@@ -1,6 +1,6 @@
 'use client'
 import React from 'react';
-import GlobeComponent from './GlobeComponent';
+import GlobeComponent from '../charts/GlobeComponent';
 
 const SliderControl = ({ label, value, min, max, onChange, unit = "°" }) => (
   <div className="space-y-2">
@@ -22,7 +22,7 @@ const SliderControl = ({ label, value, min, max, onChange, unit = "°" }) => (
         onChange={onChange}
         className="
           w-full h-2 rounded-lg appearance-none cursor-pointer
-          bg-gradient-to-r from-black/40 to-black/60
+          bg-gradient-to-r from-black/80 to-black/100
           border border-cyan-400/20
           accent-cyan-500
           hover:accent-cyan-400

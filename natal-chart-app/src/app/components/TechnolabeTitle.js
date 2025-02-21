@@ -14,7 +14,7 @@ const TechnolabeTitle = () => {
   if (!mounted) return null;
 
   return (
-    <div className="top-20 -left-6 absolute z-20 overflow-visible">
+    <div className="top-24 left-2 absolute z-20 overflow-visible">
       <style jsx>{`
         @keyframes textPulse {
           0% { text-shadow: 0 0 7px #0f03fc, 0 0 10px #0f03fc, 0 0 21px #0f03fc; }
@@ -72,7 +72,7 @@ const TechnolabeTitle = () => {
           color: transparent;
           position: relative;
           animation: textPulse 4s infinite alternate;
-          transform: scaleY(2.1); /* Slightly stretch vertically */
+          transform: scaleY(2.6); /* Slightly stretch vertically */
           filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.3));
           -webkit-text-stroke: 1px rgba(255, 255, 255, 0.5)
         }

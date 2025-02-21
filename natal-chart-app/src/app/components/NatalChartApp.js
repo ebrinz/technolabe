@@ -1,22 +1,26 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import DateControls from './charts/DateControls';
+
+// controls
+import ChartSettings from './controls/ChartSettings';
+import DateControls from './controls/DateControls';
+import { LocationControls } from './controls/LocationControls';
+import SaveAndPredict from './controls/SaveAndPredict'
+
+// charts
 import AstralChart from './charts/AstralChart';
-import PlanetInfo from './charts/PlanetInfo';
-import { LocationControls } from './charts/LocationControls';
-import ChartDataDisplay from './charts/ChartDataDisplay';
+import GlobeComponent from './charts/GlobeComponent';
 import MoonPhase from './charts/MoonPhase';
 import TimeDial from './charts/TimeDial';
-import GlobeComponent from './charts/GlobeComponent';
 
-import SaveAndPredict from './SaveAndPredict'
+// layout
 import TechnolabeTitle from './TechnolabeTitle';
 import BackgroundEffects from './BackgroundEffects';
 
-const LATITUDE_BOUNDS = {
-  min: -66.5,  // Antarctic Circle
-  max: 66.5    // Arctic Circle
-};
+// constants
+import { 
+  LATITUDE_BOUNDS 
+} from '../constants/constants';
 
 const calculateTimeFromLongitude = (longitude, baseTime = '12:00') => {
   const hourOffset = longitude / 15;
@@ -43,6 +47,9 @@ const NatalChartApp = () => {
   const [selectedPlanet, setSelectedPlanet] = useState(null);
   const [minDate, setMinDate] = useState('2025-01-01');
   const [maxDate, setMaxDate] = useState('2025-12-31');
+
+  const [useCuneiform, setUseCuneiform] = useState(true);
+  const [useTraditional, setUseTraditional] = useState(false);
 
   useEffect(() => {
     if (selectedLocation) {
@@ -117,7 +124,7 @@ const NatalChartApp = () => {
     
     <div className="h-screen overflow-hidden bg-black/60 p-4 relative">
       <div className="fixed inset-0 z-[-1]">
-        {/* <BackgroundEffects /> */}
+        <BackgroundEffects />
       </div>
       <div className="grid grid-cols-6 gap-4 h-full">
         {/* Left column - 1 column for controls */}
@@ -138,14 +145,20 @@ const NatalChartApp = () => {
                 onBoundsChange={handleDateBoundsChange}
               />
             </div>
-            
             <div className="bg-black/20 backdrop-blur-sm rounded-lg">
               <LocationControls 
                 selectedLocation={selectedLocation}
                 onLocationChange={handleLocationChange}
               />
             </div>
-
+            <div className="bg-black/20 backdrop-blur-sm rounded-lg">
+              <ChartSettings
+                useCuneiform={useCuneiform}
+                setUseCuneiform={setUseCuneiform}
+                useTraditional={useTraditional}
+                setUseTraditional={setUseTraditional}
+              />
+            </div>
             <div className="bg-black/20 backdrop-blur-sm rounded-lg">
               <SaveAndPredict 
                 chartData={chart}
@@ -165,11 +178,13 @@ const NatalChartApp = () => {
           <div className="relative flex-1 w-full">
             {/* Main Astral Chart - expanded to fill entire area */}
             <div className="absolute inset-0">
-              <AstralChart
-                chartData={chart}
-                selectedPlanet={selectedPlanet}
-                onPlanetSelect={setSelectedPlanet}
-              />
+            <AstralChart
+              chartData={chart}
+              selectedPlanet={selectedPlanet}
+              onPlanetSelect={setSelectedPlanet}
+              useCuneiform={useCuneiform}
+              useTraditional={useTraditional}
+            />
             </div>
             
             {/* Moon Phase overlay - positioned in top right */}
