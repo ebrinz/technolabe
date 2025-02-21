@@ -8,6 +8,7 @@ export const CUNEIFORM_NUMBERS = ['𒁹', '𒁹𒁹', '𒁹𒁹𒁹', '𒁹𒁹�
 export const MODERN_PLANETS = {
     'Sun': '☉',
     'Moon': '☽',
+    'Ascendent': 'ω̄',
     'Mercury': '☿',
     'Venus': '♀',
     'Mars': '♂',
@@ -23,6 +24,7 @@ export const MODERN_PLANETS = {
 export const TRADITIONAL_PLANETS = {
     'Sun': '☉',
     'Moon': '☽',
+    'Ascendent': 'ω̄',
     'Mercury': '☿',
     'Venus': '♀',
     'Mars': '♂',

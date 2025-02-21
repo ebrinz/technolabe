@@ -1,8 +1,19 @@
 'use client'
-import React from 'react';
+import React, { useCallback } from 'react';
 import GlobeComponent from '../charts/GlobeComponent';
 
-const SliderControl = ({ label, value, min, max, onChange, unit = "°" }) => (
+// Pre-calculate hours per degree
+const HOURS_PER_DEGREE = 1 / 15;
+
+// Optimized time calculation
+const calculateTimeOffset = (oldLng, newLng, currentTime) => {
+  const hourDiff = (newLng - oldLng) * HOURS_PER_DEGREE;
+  const [hours, minutes] = currentTime.split(':').map(Number);
+  let totalMinutes = ((hours * 60 + minutes + (hourDiff * 60)) + 1440) % 1440; // Add 1440 (24*60) before modulo to handle negatives
+  return `${String(Math.floor(totalMinutes / 60)).padStart(2, '0')}:${String(Math.round(totalMinutes % 60)).padStart(2, '0')}`;
+};
+
+const SliderControl = React.memo(({ label, value, min, max, onChange, unit = "°" }) => (
   <div className="space-y-2">
     <div className="flex justify-between text-sm">
       <span className="text-cyan-300">
@@ -32,41 +43,62 @@ const SliderControl = ({ label, value, min, max, onChange, unit = "°" }) => (
       <div className="absolute inset-0 blur-sm bg-cyan-400/10 rounded-lg pointer-events-none" />
     </div>
   </div>
-);
+));
 
-export const LocationControls = ({ selectedLocation, onLocationChange }) => (
-  <div className="bg-black/20 backdrop-blur-sm">
-    <div className="space-y-4 p-4 rounded-lg border border-cyan-500/20">
-      {/* Latitude Slider */}
-      <SliderControl
-        label="Latitude"
-        value={selectedLocation.lat}
-        min={-66.5}
-        max={66.5}
-        onChange={(e) => onLocationChange(prev => ({ 
-          ...prev, 
-          lat: parseFloat(e.target.value) 
-        }))}
-      />
-      
-      {/* Longitude Slider */}
-      <SliderControl
-        label="Longitude"
-        value={selectedLocation.lng}
-        min={-180}
-        max={180}
-        onChange={(e) => onLocationChange(prev => ({ 
-          ...prev, 
-          lng: parseFloat(e.target.value) 
-        }))}
-      />
+SliderControl.displayName = 'SliderControl';
 
-      <div className="mt-2 rounded-lg overflow-hidden border border-cyan-500/20">
-        <GlobeComponent 
-          selectedLocation={selectedLocation}
-          onLocationChange={onLocationChange}
+export const LocationControls = ({ 
+  selectedLocation, 
+  onLocationChange, 
+  selectedTime = '12:00', 
+  onTimeChange = () => {} 
+}) => {
+  const handleLatitudeChange = useCallback((e) => {
+    const newLat = Math.max(-66.5, Math.min(66.5, parseFloat(e.target.value)));
+    onLocationChange({ ...selectedLocation, lat: newLat });
+  }, [selectedLocation, onLocationChange]);
+
+  const handleLongitudeChange = useCallback((e) => {
+    const newLng = Math.max(-180, Math.min(180, parseFloat(e.target.value)));
+    const newTime = calculateTimeOffset(selectedLocation.lng, newLng, selectedTime);
+    onLocationChange({ ...selectedLocation, lng: newLng });
+    onTimeChange(newTime);
+  }, [selectedLocation, selectedTime, onLocationChange, onTimeChange]);
+
+  const handleGlobeLocationChange = useCallback((newLocation) => {
+    const newTime = calculateTimeOffset(selectedLocation.lng, newLocation.lng, selectedTime);
+    onLocationChange(newLocation);
+    onTimeChange(newTime);
+  }, [selectedLocation.lng, selectedTime, onLocationChange, onTimeChange]);
+
+  return (
+    <div className="bg-black/20 backdrop-blur-sm">
+      <div className="space-y-4 p-4 rounded-lg border border-cyan-500/20">
+        <SliderControl
+          label="Latitude"
+          value={selectedLocation.lat}
+          min={-66.5}
+          max={66.5}
+          onChange={handleLatitudeChange}
         />
+        
+        <SliderControl
+          label="Longitude"
+          value={selectedLocation.lng}
+          min={-180}
+          max={180}
+          onChange={handleLongitudeChange}
+        />
+
+        <div className="mt-2 rounded-lg overflow-hidden border border-cyan-500/20">
+          <GlobeComponent 
+            selectedLocation={selectedLocation}
+            onLocationChange={handleGlobeLocationChange}
+          />
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
+
+export default React.memo(LocationControls);

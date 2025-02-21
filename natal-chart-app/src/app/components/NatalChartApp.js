@@ -85,7 +85,6 @@ const NatalChartApp = () => {
       }
       
       const data = await response.json();
-      console.log('NEW DATA', data);
       setChart(data);
     } catch (error) {
       console.error('Error fetching chart data:', error);
@@ -149,6 +148,8 @@ const NatalChartApp = () => {
               <LocationControls 
                 selectedLocation={selectedLocation}
                 onLocationChange={handleLocationChange}
+                selectedTime={selectedTime}
+                onTimeChange={setSelectedTime}
               />
             </div>
             <div className="bg-black/20 backdrop-blur-sm rounded-lg">

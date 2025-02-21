@@ -21,6 +21,7 @@ const calculateMidpoint = (start, end) => {
   return normalizeAngle(mid);
 };
 
+
 const AstralChart = ({ 
     chartData, 
     selectedPlanet, 
@@ -30,56 +31,100 @@ const AstralChart = ({
   }) => {
   const [hoveredSign, setHoveredSign] = useState(null);
   const [hoveredPlanet, setHoveredPlanet] = useState(null);
-  
+
   if (!chartData?.points) return null;
 
-  // Get the appropriate number system
+  // Get the appropriate number system and planet set
   const HOUSE_NUMBERS = useCuneiform ? CUNEIFORM_NUMBERS : ROMAN_NUMERALS;
-  
-  // Get the appropriate planet set
   const PLANET_SYMBOLS = useTraditional ? TRADITIONAL_PLANETS : MODERN_PLANETS;
 
-  const radius = 140; // Slightly reduced from 150
-  const center = { x: 200, y: 200 }; // Adjusted from 200,200
+  const radius = 140;
+  const center = { x: 200, y: 200 };
   const innerRadius = radius - 30;
-  const outerBoundaryRadius = radius + 50; // Reduced from 55
-  const zodiacRadius = radius + 20; // Adjusted
+  const outerBoundaryRadius = radius + 50;
+  const zodiacRadius = radius + 20;
   const outerZodiacRadius = zodiacRadius + 10;
-  const houseRadius = outerZodiacRadius + 4; // Adjusted
+  const houseRadius = outerZodiacRadius + 4;
   const houseInnerRadius = innerRadius + 4;
   const zodiacLabelRadius = (radius + zodiacRadius) / 2 + 2;
   const houseLabelRadius = (outerBoundaryRadius + houseRadius) / 2 - 2;
-  const planetLabelRadius = radius + 30; // Adjusted
+  const planetLabelRadius = radius + 30;
 
+  // Get Ascendant degree from chartData
+  // const ascendantDegree = chartData.points.Ascendent?.longitude || 0;
+  const ascendantDegree = chartData.houses.House1 || 0;
 
-  const getTextRotation = (degrees) => {
-    let rotation = degrees;
-    return rotation;
+  // Calculate chart rotation to place Ascendant at 270 degrees (9 o'clock)
+  const chartRotation = ascendantDegree - 270;
+
+  // Position calculation functions
+  const getChartPosition = (degree, r) => {
+    const rotatedDegree = normalizeAngle(degree - chartRotation);
+    return {
+      x: center.x + r * Math.cos((rotatedDegree - 90) * Math.PI / 180),
+      y: center.y + r * Math.sin((rotatedDegree - 90) * Math.PI / 180)
+    };
   };
 
-  const degreesToXY = (degrees, r) => ({
-    x: center.x + r * Math.cos((degrees - 90) * Math.PI / 180),
-    y: center.y + r * Math.sin((degrees - 90) * Math.PI / 180)
+  const getTextPosition = (degree, r) => ({
+    x: center.x + r * Math.cos((degree - 90) * Math.PI / 180),
+    y: center.y + r * Math.sin((degree - 90) * Math.PI / 180),
+    rotation: degree
   });
 
-  const houseCusps = Object.entries(chartData.houses)
-    .map(([house, degree]) => { 
-      const houseNum = parseInt(house.replace('House', ''));
-      const nextHouseNum = (houseNum % 12) + 1;
-      const nextDegree = chartData.houses[`House${nextHouseNum}`] || chartData.houses.House1;
-      const midpointDegree = nextDegree < degree 
-        ? calculateMidpoint(degree, nextDegree + 360)
-        : calculateMidpoint(degree, nextDegree);
-      
-      return {
-        house: HOUSE_NUMBERS[houseNum - 1],
-        startDegree: degree,
-        midpointDegree: normalizeAngle(midpointDegree),
-        position: degreesToXY(degree, radius),
-        labelPosition: degreesToXY(normalizeAngle(midpointDegree), houseLabelRadius),
-        rotation: getTextRotation(normalizeAngle(midpointDegree))
-      };
+  const getFixedDegreeXY = (degrees, r) => {
+    return {
+      x: center.x + r * Math.cos((degrees - 90) * Math.PI / 180),
+      y: center.y + r * Math.sin((degrees - 90) * Math.PI / 180)
+    };
+  };
+
+  const getTextRotationAngle = (degree, r) => {
+    const position = degreesToXY(degree, r);
+    // Calculate angle between position and center
+    const angle = Math.atan2(position.y - center.y, position.x - center.x) * (180 / Math.PI);
+    // Add 90 degrees to make text perpendicular to radius line
+    // The + 90 ensures bottom of text points to center
+    return angle + 90;
+  };
+
+  // Use getChartPosition for all chart elements
+  const degreesToXY = (degrees, r) => {
+    const rotatedDegree = normalizeAngle(degrees - chartRotation);
+    return {
+      x: center.x + r * Math.cos((rotatedDegree - 90) * Math.PI / 180),
+      y: center.y + r * Math.sin((rotatedDegree - 90) * Math.PI / 180)
+    };
+  };
+
+  // Generate house cusps with fixed text orientation
+  const houseCusps = Array.from({length: 12}, (_, i) => {
+    const houseNum = i + 1;
+    const currentHouse = `House${houseNum}`;
+    const nextHouse = `House${(houseNum % 12) + 1}`;
+    
+    const degree = chartData.houses[currentHouse];
+    const nextDegree = chartData.houses[nextHouse];
+    
+    // Calculate midpoint considering wrap-around
+    const midpointDegree = nextDegree < degree 
+      ? calculateMidpoint(degree, nextDegree + 360)
+      : calculateMidpoint(degree, nextDegree);
+  
+    const normalizedMidpoint = normalizeAngle(midpointDegree);
+    
+    return {
+      house: HOUSE_NUMBERS[i],
+      houseNum: houseNum, // Add this to make checking for houses 6 and 12 easier
+      startDegree: degree,
+      endDegree: nextDegree,
+      midpointDegree: normalizedMidpoint,
+      position: degreesToXY(degree, radius),
+      labelPosition: degreesToXY(normalizedMidpoint, houseLabelRadius),
+      rotation: getTextRotationAngle(normalizedMidpoint, radius)
+    };
   });
+
 
   const planets = Object.entries(chartData.points || {})
     .filter(([planet, data]) => {
@@ -98,6 +143,32 @@ const AstralChart = ({
       sign: data.sign,
       movement: data.movement
     }));
+
+  // // Update planet positions while keeping text orientation
+  // const planets = Object.entries(chartData.points || {})
+  //   .filter(([planet, data]) => {
+  //     if (useTraditional) {
+  //       return TRADITIONAL_PLANETS.hasOwnProperty(planet);
+  //     }
+  //     return data && data.longitude !== undefined;
+  //   })
+  //   .map(([planet, data]) => {
+  //     const chartPos = getChartPosition(data.longitude, radius * 0.8);
+  //     const textPos = getTextPosition(data.longitude, planetLabelRadius);
+      
+  //     return {
+  //       symbol: PLANET_SYMBOLS[planet] || planet,
+  //       name: planet,
+  //       longitude: data.longitude,
+  //       position: chartPos,
+  //       labelPosition: textPos,
+  //       house: data.house,
+  //       sign: data.sign,
+  //       movement: data.movement
+  //     };
+  //   });
+
+  
 
   return (
     <svg viewBox="0 0 400 400" className="w-full h-full">
@@ -142,6 +213,7 @@ const AstralChart = ({
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
+
 
         {/* Create gradients for each aspect type */}
         {Object.entries(ASPECT_COLORS).map(([aspectType, color]) => (
@@ -201,19 +273,25 @@ const AstralChart = ({
       <circle cx={center.x} cy={center.y} r={innerRadius} 
               className="fill-none stroke-cyan-300/20" strokeWidth="0.5"/>
 
-       {/* House cusp lines */}
-       {houseCusps.map((house, i) => (
-        <g key={`house-${i}`}>
+
+      {/* House cusp lines */}
+      {/* Draw all house boundaries and labels */}
+      {houseCusps.map((house, i) => (
+        <g key={`house-group-${i}`}>
+          {/* Main house line */}
           <line 
+            key={`house-line-${i}`}
             x1={degreesToXY(house.startDegree, houseInnerRadius).x}
             y1={degreesToXY(house.startDegree, houseInnerRadius).y}
             x2={degreesToXY(house.startDegree, outerBoundaryRadius).x}
             y2={degreesToXY(house.startDegree, outerBoundaryRadius).y}
             className="stroke-orange-400/20"
             strokeWidth="1"
-            style={{ filter: 'url(#orangeGlow)' }}
+            // style={{ filter: 'url(#orangeGlow)' }}
           />
+          {/* House label */}
           <text 
+            key={`house-label-${i}`}
             x={house.labelPosition.x}
             y={house.labelPosition.y}
             textAnchor="middle"
@@ -229,6 +307,9 @@ const AstralChart = ({
           </text>
         </g>
       ))}
+
+
+
 
       {/* Zodiac cusps and degree markers */}
       {ZODIAC_SIGNS.map((sign, i) => {
@@ -301,7 +382,7 @@ const AstralChart = ({
       {/* Zodiac signs with rotated labels */}
       {ZODIAC_SIGNS.map((sign, i) => {
         const position = degreesToXY(sign.degree + 15, zodiacLabelRadius);
-        const rotation = getTextRotation(sign.degree + 15);
+        const rotation = getTextPosition(sign.degree + 15);
         
         return (
           <g key={`zodiac-${i}`}

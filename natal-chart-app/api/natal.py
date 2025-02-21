@@ -238,6 +238,10 @@ class AstroChart:
         missing_planets = self.get_missing_modern_planets()
         for name, point in missing_planets.items():
             planet_positions.append((name, point.longitude))
+
+        # Add Ascendant
+        house1_lon = self.chart.get(HOUSE1).lon
+        planet_positions.append(('Ascendent', house1_lon))
         
         # Calculate aspects between all planets
         for i, (p1_name, p1_lon) in enumerate(planet_positions):
@@ -262,7 +266,7 @@ class AstroChart:
     def get_missing_modern_planets(self) -> Dict[str, ChartPoint]:
         """Generate placeholder data for missing modern planets"""
         missing = {}
-        modern_names = ['Uranus', 'Neptune', 'Pluto']
+        modern_names = ['Ascendent', 'Uranus', 'Neptune', 'Pluto']
         
         for name in modern_names:
             if name not in self.available_planets:
@@ -273,6 +277,13 @@ class AstroChart:
                     lon = (30 * 11 + 15) % 360  # Middle of Pisces  
                 elif name == 'Pluto':
                     lon = (30 * 9 + 15) % 360  # Middle of Scorpio
+                elif name == 'Ascendent':
+                    try:
+                        house1_obj = self.chart.get(HOUSE1)
+                        lon = house1_obj.lon
+                    except Exception as e:
+                        print(f"Error getting Ascendant position: {e}")
+                        lon = 270
                 
                 sign_index = int(lon / 30) % 12
                 sign_names = ['Aries', 'Taurus', 'Gemini', 'Cancer', 

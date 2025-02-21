@@ -45,8 +45,6 @@ const MoonPhase = ({ chartData }) => {
     const phase = calculateMoonPhase();
     if (!phase) return;
 
-    console.log(phase.illumination, phase.angle, phase.isWaxing)
-
     const size = canvas.width;
     const radius = size / 3;
     const centerX = size / 2;
