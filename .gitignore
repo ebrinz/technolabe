@@ -1,8 +1,17 @@
-
+.DS_Store
+.venv/
 __pycache__/
+
+*.old
+
 
 node_modules/
 
-.DS_Store
 
-.venv/
+
+astro-vector/data/*/*pdf
+astro-vector/models/*model
+astro-vector/data/*txt
+astro-vector/Pipfile
+astro-vector/Pipfile.lock
+
