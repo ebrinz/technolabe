@@ -15,3 +15,4 @@ astro-vector/data/*txt
 astro-vector/Pipfile
 astro-vector/Pipfile.lock
 
+*.png
