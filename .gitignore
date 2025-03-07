@@ -16,3 +16,4 @@ astro-vector/Pipfile
 astro-vector/Pipfile.lock
 
 *.png
+*.log
