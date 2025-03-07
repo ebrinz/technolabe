@@ -43,27 +43,31 @@ vedic_astro_textbook.pdf
 ```
 
 
-
-
-
-
-
 #### View the most common words and basic model info
 ```
-python notebooks/word2vec-explorer.py astro_vec_model
+python explore_word2vec.py --model models/astro_vec_model
 ```
-
-#### Explore words similar to "astrology"
+#### Find words similar to "astrology"
 ```
-python notebooks/word2vec-explorer.py astro_vec_model --word astrology
+python explore_word2vec.py --model models/astro_vec_model --word astrology --topn 15
 ```
-
-#### Test if your model captures analogies like "mars is to war as venus is to ?"
-```
-python notebooks/word2vec-explorer.py astro_vec_model --analogy mars war venus
-```
-
 #### Visualize relationships between zodiac signs
 ```
-python notebooks/word2vec-explorer.py astro_vec_model --visualize aries taurus gemini cancer leo virgo libra scorpio sagittarius capricorn aquarius pisces
+python explore_word2vec.py --model models/astro_vec_model --visualize aries,taurus,gemini,cancer,leo,virgo,libra,scorpio,sagittarius,capricorn,aquarius,pisces --output zodiac_signs.png
+```
+#### Explore specific astrological categories
+```
+python explore_word2vec.py --model models/astro_vec_model --categories planets,elements
+```
+#### Analyze relationships between word pairs
+```
+python explore_word2vec.py --model models/astro_vec_model --pairs word_pairs.txt
+```
+#### Example content for word_pairs.txt
+```
+mars,war
+venus,love
+jupiter,expansion
+saturn,restriction
+moon,emotions
 ```
