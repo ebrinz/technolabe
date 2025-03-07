@@ -3,120 +3,134 @@ import React, { useEffect, useRef } from 'react';
 
 const BackgroundEffects = () => {
   const canvasRef = useRef(null);
-  const starsRef = useRef([]);
-  const brightStarsRef = useRef([]);
+  const foregroundStarsRef = useRef([]);
+  const backgroundStarsRef = useRef([]);
   const animationFrameRef = useRef(null);
+
+  // Realistic star colors based on stellar classification
+  const starColors = [
+    { color: '#ff4422', weight: 1 },   // Class M (Red)
+    { color: '#ff8866', weight: 2 },   // Class K (Orange)
+    { color: '#ffaa44', weight: 3 },   // Class G (Yellow-Orange)
+    { color: '#ffffff', weight: 4 },   // Class F (White)
+    { color: '#aaaaff', weight: 3 },   // Class A (Blue-White)
+    { color: '#99bbff', weight: 2 },   // Class B (Blue)
+    { color: '#99ddff', weight: 1 },   // Class O (Bright Blue)
+  ];
+
+  const getRandomStarColor = () => {
+    const totalWeight = starColors.reduce((sum, color) => sum + color.weight, 0);
+    let random = Math.random() * totalWeight;
+    
+    for (const star of starColors) {
+      if (random < star.weight) return star.color;
+      random -= star.weight;
+    }
+    return starColors[0].color;
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     let width = window.innerWidth;
     let height = window.innerHeight;
+    const centerX = width * 0.666; // Places origin point at 2/3 of screen width
+    const centerY = height * 0.5;  // Places origin point at middle height
 
     const initCanvas = () => {
       canvas.width = width;
       canvas.height = height;
     };
 
-    // Create stars with different properties for variety
+    const createStar = (isForeground) => {
+      // Start stars from center
+      const angle = Math.random() * Math.PI * 2;
+      const distance = Math.random() * (isForeground ? 100 : 200);
+      
+      return {
+        x: centerX + Math.cos(angle) * distance,
+        y: centerY + Math.sin(angle) * distance,
+        size: isForeground ? Math.random() * 2 + 1 : Math.random() * 1 + 0.5,
+        speed: isForeground ? Math.random() * 2 + 2 : Math.random() * 1 + 0.5,
+        angle: angle,
+        distance: distance,
+        color: getRandomStarColor(),
+        brightness: Math.random() * 0.3 + 0.7, // Increased minimum brightness from 0.5 to 0.7
+        twinkleSpeed: Math.random() * 0.05 + 0.02,
+        twinklePhase: Math.random() * Math.PI * 2,
+      };
+    };
+
     const createStars = () => {
-      // Regular stars
-      starsRef.current = Array.from({ length: 150 }, () => ({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        size: Math.random() * 1.5 + 0.5,
-        speed: Math.random() * 0.3 + 0.1,
-        opacity: Math.random() * 0.5 + 0.3,
-        layer: Math.floor(Math.random() * 3)  // Different depth layers
-      }));
-
-      // Bright stars with glow effect
-      brightStarsRef.current = Array.from({ length: 15 }, () => ({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        size: Math.random() * 2 + 1,
-        speed: Math.random() * 0.2 + 0.05,
-        baseOpacity: Math.random() * 0.3 + 0.7,
-        glowSize: Math.random() * 4 + 2,
-        pulse: 0,
-        pulseSpeed: Math.random() * 0.03 + 0.01,
-        color: Math.random() > 0.5 ? '#add8e6' : '#ffffff'  // Mix of white and light blue
-      }));
+      foregroundStarsRef.current = Array.from({ length: 100 }, () => createStar(true));
+      backgroundStarsRef.current = Array.from({ length: 200 }, () => createStar(false));
     };
 
-    const drawStar = (x, y, size, opacity) => {
-      ctx.beginPath();
-      ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
-      ctx.arc(x, y, size, 0, Math.PI * 2);
-      ctx.fill();
-    };
-
-    const drawBrightStar = (star) => {
-      // Update pulse
-      star.pulse += star.pulseSpeed;
-      const pulseOpacity = Math.sin(star.pulse) * 0.2 + star.baseOpacity;
-
-      // Draw glow effect
+    const drawStar = (star) => {
+      // Update twinkle effect
+      star.twinklePhase += star.twinkleSpeed;
+      const twinkle = Math.sin(star.twinklePhase) * 0.2 + 0.8;
+      
+      // Create gradient for glow effect
       const gradient = ctx.createRadialGradient(
         star.x, star.y, 0,
-        star.x, star.y, star.glowSize * 2
+        star.x, star.y, star.size * 2
       );
-      gradient.addColorStop(0, `rgba(255, 255, 255, ${pulseOpacity})`);
-      gradient.addColorStop(0.3, `rgba(255, 255, 255, ${pulseOpacity * 0.3})`);
+      
+      // Convert hex color to RGB for opacity handling
+      const hexToRgb = (hex) => {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16)
+        } : null;
+      };
+      
+      const rgb = hexToRgb(star.color);
+      const opacity = star.brightness * twinkle;
+      
+      gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity * 1.5})`);  // Increased core brightness
+      gradient.addColorStop(0.4, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity * 0.6})`); // Increased glow brightness
       gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
       ctx.beginPath();
       ctx.fillStyle = gradient;
-      ctx.arc(star.x, star.y, star.glowSize * 2, 0, Math.PI * 2);
+      ctx.arc(star.x, star.y, star.size * 2, 0, Math.PI * 2);
       ctx.fill();
+    };
 
-      // Draw star center
-      ctx.beginPath();
-      ctx.fillStyle = star.color;
-      ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-      ctx.fill();
+    const updateStarPosition = (star, speedMultiplier) => {
+      // Calculate new position with outward expansion
+      const expansionSpeed = star.speed * speedMultiplier;
+      star.distance += expansionSpeed;
+      
+      // Calculate new coordinates with slight sideways movement
+      const sideOffset = Math.sin(star.angle) * (star.distance * 0.1);
+      star.x = centerX + Math.cos(star.angle) * star.distance + sideOffset;
+      star.y = centerY + Math.sin(star.angle) * star.distance - star.distance * 0.5;
 
-      // Optional: Add cross light effect for extra brightness
-      ctx.strokeStyle = `rgba(255, 255, 255, ${pulseOpacity * 0.5})`;
-      ctx.lineWidth = 0.5;
-      ctx.beginPath();
-      ctx.moveTo(star.x - star.glowSize, star.y);
-      ctx.lineTo(star.x + star.glowSize, star.y);
-      ctx.moveTo(star.x, star.y - star.glowSize);
-      ctx.lineTo(star.x, star.y + star.glowSize);
-      ctx.stroke();
+      // Reset star if it goes off screen
+      const margin = 50;
+      if (star.x < -margin || star.x > width + margin || 
+          star.y < -margin || star.y > height + margin) {
+        Object.assign(star, createStar(speedMultiplier > 1));
+      }
     };
 
     const drawStars = () => {
       ctx.clearRect(0, 0, width, height);
       
-      // Draw regular stars by layer (creates depth effect)
-      [0, 1, 2].forEach(layer => {
-        starsRef.current
-          .filter(star => star.layer === layer)
-          .forEach(star => {
-            drawStar(star.x, star.y, star.size, star.opacity);
-            
-            // Move star based on layer (parallax effect)
-            star.y += star.speed * (layer + 1);
-
-            if (star.y > height) {
-              star.y = 0;
-              star.x = Math.random() * width;
-            }
-          });
+      // Draw and update background stars
+      backgroundStarsRef.current.forEach(star => {
+        drawStar(star);
+        updateStarPosition(star, 0.5);
       });
 
-      // Draw bright stars
-      brightStarsRef.current.forEach(star => {
-        drawBrightStar(star);
-        
-        star.y += star.speed;
-        if (star.y > height) {
-          star.y = 0;
-          star.x = Math.random() * width;
-          star.pulse = 0;  // Reset pulse for smooth transition
-        }
+      // Draw and update foreground stars
+      foregroundStarsRef.current.forEach(star => {
+        drawStar(star);
+        updateStarPosition(star, 2);
       });
 
       animationFrameRef.current = requestAnimationFrame(drawStars);
