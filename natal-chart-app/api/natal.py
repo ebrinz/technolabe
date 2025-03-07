@@ -35,7 +35,7 @@ class AstroChart:
     # Traditional planets that are directly supported by flatlib
     TRADITIONAL_PLANETS = [SUN, MOON, MERCURY, VENUS, MARS, JUPITER, SATURN]
     # Modern planets that we'll try to get from ephem
-    MODERN_PLANETS = [URANUS, NEPTUNE, PLUTO, CHIRON]
+    MODERN_PLANETS = [URANUS, NEPTUNE, PLUTO]
     
     HOUSES = [HOUSE1, HOUSE2, HOUSE3, HOUSE4, HOUSE5, HOUSE6, 
               HOUSE7, HOUSE8, HOUSE9, HOUSE10, HOUSE11, HOUSE12]
@@ -363,6 +363,8 @@ def get_chart():
         
         with cache_lock:
             chart_cache[cache_key] = result
+
+        print(result)
             
         return jsonify(result)
         
