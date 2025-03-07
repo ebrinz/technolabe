@@ -45,23 +45,23 @@ vedic_astro_textbook.pdf
 
 #### View the most common words and basic model info
 ```
-python explore_word2vec.py --model models/astro_vec_model
+python notebooks/word2vec-explorer.py --model models/astro_vec_model
 ```
 #### Find words similar to "astrology"
 ```
-python explore_word2vec.py --model models/astro_vec_model --word astrology --topn 15
+python notebooks/word2vec-explorer.py --model models/astro_vec_model --word astrology --topn 15
 ```
 #### Visualize relationships between zodiac signs
 ```
-python explore_word2vec.py --model models/astro_vec_model --visualize aries,taurus,gemini,cancer,leo,virgo,libra,scorpio,sagittarius,capricorn,aquarius,pisces --output zodiac_signs.png
+python notebooks/word2vec-explorer.py --model models/astro_vec_model --visualize aries,taurus,gemini,cancer,leo,virgo,libra,scorpio,sagittarius,capricorn,aquarius,pisces --output zodiac_signs.png
 ```
 #### Explore specific astrological categories
 ```
-python explore_word2vec.py --model models/astro_vec_model --categories planets,elements
+python notebooks/word2vec-explorer.py --model models/astro_vec_model --categories planets,elements
 ```
 #### Analyze relationships between word pairs
 ```
-python explore_word2vec.py --model models/astro_vec_model --pairs word_pairs.txt
+python notebooks/word2vec-explorer.py --model models/astro_vec_model --pairs word_pairs.txt
 ```
 #### Example content for word_pairs.txt
 ```
