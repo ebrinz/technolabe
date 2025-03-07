@@ -90,7 +90,9 @@ def visualize_words(model, words_to_visualize, output_file=None):
         
         # Use t-SNE to reduce dimensionality
         logger.info("Performing t-SNE dimensionality reduction...")
-        tsne = TSNE(n_components=2, random_state=42, perplexity=min(30, max(5, len(valid_words)-1)))
+        # Set perplexity to be less than the number of samples
+        perplexity = min(30, max(3, len(valid_words)-1))
+        tsne = TSNE(n_components=2, random_state=42, perplexity=perplexity)
         coords = tsne.fit_transform(word_vectors)
         
         # Create plot

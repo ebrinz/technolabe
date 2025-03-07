@@ -61,7 +61,7 @@ python notebooks/word2vec-explorer.py --model models/astro_vec_model --categorie
 ```
 #### Analyze relationships between word pairs
 ```
-python notebooks/word2vec-explorer.py --model models/astro_vec_model --pairs word_pairs.txt
+python notebooks/word2vec-explorer.py --model models/astro_vec_model --pairs notebooks/word_pairs.txt
 ```
 #### Example content for word_pairs.txt
 ```

@@ -1,0 +1,5 @@
+mars,war
+venus,love
+jupiter,expansion
+saturn,restriction
+moon,emotions
